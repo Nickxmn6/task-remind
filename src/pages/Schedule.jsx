@@ -3,6 +3,7 @@ import { useEvents } from '../hooks/useEvents'
 import EventCard from '../components/EventCard'
 import EventModal from '../components/EventModal'
 import CompleteEventModal from '../components/CompleteEventModal'
+import CertificateModal from '../components/CertificateModal'
 import { Plus, Search, SlidersHorizontal, X, CalendarDays, Inbox } from 'lucide-react'
 
 const CATEGORY_ICONS = {
@@ -18,6 +19,7 @@ export default function Schedule() {
   const [showModal, setShowModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState(null)
   const [completeModal, setCompleteModal] = useState({ open: false, event: null })
+  const [certModal, setCertModal] = useState({ open: false, event: null })
 
   const categories = ['Work', 'Personal', 'Meeting', 'Birthday', 'Other']
 
@@ -132,6 +134,7 @@ export default function Schedule() {
               event={event}
               onEdit={() => { setEditingEvent(event); setShowModal(true) }}
               onStatusUpdate={() => setCompleteModal({ open: true, event })}
+              onViewCertificate={() => setCertModal({ open: true, event })}
             />
           ))
         )}
@@ -155,6 +158,12 @@ export default function Schedule() {
           await updateEventStatus(id, 'completed', file)
           setCompleteModal({ open: false, event: null })
         }}
+      />
+
+      <CertificateModal
+        isOpen={certModal.open}
+        onClose={() => setCertModal({ open: false, event: null })}
+        event={certModal.event}
       />
     </div>
   )

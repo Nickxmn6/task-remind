@@ -3,6 +3,7 @@ import { useEvents } from '../hooks/useEvents'
 import EventCard from '../components/EventCard'
 import EventModal from '../components/EventModal'
 import CompleteEventModal from '../components/CompleteEventModal'
+import CertificateModal from '../components/CertificateModal'
 import { Calendar, Clock, Layers, TrendingUp, Plus, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const { events, getUpcomingEvents, loading, saving, addEvent, updateEvent, updateEventStatus } = useEvents()
   const [showModal, setShowModal] = useState(false)
   const [completeModal, setCompleteModal] = useState({ open: false, event: null })
+  const [certModal, setCertModal] = useState({ open: false, event: null })
   const navigate = useNavigate()
 
   const upcomingEvents = getUpcomingEvents(7)
@@ -136,6 +138,7 @@ export default function Dashboard() {
                 event={event}
                 onEdit={() => {}}
                 onStatusUpdate={() => setCompleteModal({ open: true, event })}
+                onViewCertificate={() => setCertModal({ open: true, event })}
               />
             ))}
           </div>
@@ -160,6 +163,12 @@ export default function Dashboard() {
           await updateEventStatus(id, 'completed', file)
           setCompleteModal({ open: false, event: null })
         }}
+      />
+
+      <CertificateModal
+        isOpen={certModal.open}
+        onClose={() => setCertModal({ open: false, event: null })}
+        event={certModal.event}
       />
     </div>
   )
