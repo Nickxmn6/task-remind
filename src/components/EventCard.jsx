@@ -1,4 +1,5 @@
-import { Calendar, Clock, MapPin, Bell, CheckCircle, Circle, FileText, Edit2 } from 'lucide-react'
+import { Calendar, Clock, MapPin, Bell, CheckCircle, Circle, FileText, Edit2, X } from 'lucide-react'
+import { useState } from 'react'
 
 const STATUS_CONFIG = {
   completed: {
@@ -33,6 +34,8 @@ const CATEGORY_EMOJIS = {
 }
 
 export default function EventCard({ event, onEdit, onStatusUpdate }) {
+  const [showCertModal, setShowCertModal] = useState(false)
+
   const formatDate = (date) =>
     new Date(date).toLocaleDateString('id-ID', {
       weekday: 'short',
@@ -119,16 +122,13 @@ export default function EventCard({ event, onEdit, onStatusUpdate }) {
 
               {/* Certificate link */}
               {event.certificate_url && (
-                <a
-                  href={event.certificate_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowCertModal(true); }}
                   className="mt-2 inline-flex items-center gap-1 text-emerald-400 text-xs hover:text-emerald-300 transition-colors"
                 >
                   <FileText size={11} />
                   View Certificate
-                </a>
+                </button>
               )}
             </div>
 
@@ -154,6 +154,33 @@ export default function EventCard({ event, onEdit, onStatusUpdate }) {
           </div>
         </div>
       </div>
+
+      {/* ── Certificate Modal ── */}
+      {showCertModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={(e) => { e.stopPropagation(); setShowCertModal(false); }}
+        >
+          <div 
+            className="glass-card relative max-w-3xl w-full p-2 md:p-3 border border-white/10 shadow-2xl animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowCertModal(false); }}
+              className="absolute -top-3 -right-3 md:-top-4 md:-right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-slate-800 text-white/50 hover:text-white hover:bg-slate-700 border border-white/10 hover:border-white/20 transition-all z-10"
+            >
+              <X size={18} />
+            </button>
+            <div className="w-full h-full bg-slate-900/50 rounded-lg overflow-hidden flex items-center justify-center">
+              <img 
+                src={event.certificate_url} 
+                alt="Certificate" 
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
