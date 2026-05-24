@@ -25,7 +25,7 @@ function StatCard({ label, value, icon: Icon, gradient, delay }) {
 }
 
 export default function Dashboard() {
-  const { profile } = useAuth()
+  const { profile, updateProfile } = useAuth()
   const { events, getUpcomingEvents, loading, saving, addEvent, updateEvent, updateEventStatus } = useEvents()
   const [showModal, setShowModal] = useState(false)
   const [completeModal, setCompleteModal] = useState({ open: false, event: null })

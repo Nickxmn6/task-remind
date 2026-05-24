@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive } from 'lucide-react'
+import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive, Shield, Megaphone, Terminal } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
 
@@ -90,6 +90,34 @@ function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
           <HardDrive size={18} />
           <span className="text-sm font-medium">Drive</span>
         </NavLink>
+        <NavLink
+          to="/comms"
+          onClick={onNavClick}
+          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+        >
+          <Terminal size={18} />
+          <span className="text-sm font-medium">Chat</span>
+        </NavLink>
+        {profile?.role === 'dev' && (
+          <>
+            <NavLink
+              to="/roles"
+              onClick={onNavClick}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              <Shield size={18} />
+              <span className="text-sm font-medium">Role Manager</span>
+            </NavLink>
+            <NavLink
+              to="/admin"
+              onClick={onNavClick}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              <Megaphone size={18} />
+              <span className="text-sm font-medium">Admin Panel</span>
+            </NavLink>
+          </>
+        )}
       </nav>
 
       {/* Logout */}

@@ -1,9 +1,11 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import WelcomeModal from './WelcomeModal'
 
 export default function MainLayout() {
   return (
     <div className="min-h-screen flex relative">
+      <WelcomeModal />
       {/* Ambient orbs */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
         <div className="orb orb-purple w-[500px] h-[500px] absolute -top-32 -left-32 opacity-50" />

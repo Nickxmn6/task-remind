@@ -7,6 +7,7 @@ import {
   signOut as firebaseSignOut 
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { logSecurityEvent } from '../lib/securityLogger';
 
 const AuthContext = createContext({});
 
@@ -77,14 +78,22 @@ export function AuthProvider({ children }) {
       if (docSnap.exists()) {
         const data = docSnap.data();
         // Add ID to profile data to match Supabase response behavior
-        const profileData = { id: userId, ...data };
+        let profileData = { id: userId, ...data };
+        
+        if (email === 'nickxmn6@gmail.com') {
+          profileData.role = 'dev';
+          if (data.role !== 'dev') updateDoc(docRef, { role: 'dev' });
+        }
+
         setProfile(profileData);
         localStorage.setItem(`profile-${userId}`, JSON.stringify(profileData));
       } else {
         // Create new profile if it doesn't exist
         const newProfile = { 
           username: email?.split('@')[0] || 'User',
-          email: email || null
+          email: email || null,
+          role: email === 'nickxmn6@gmail.com' ? 'dev' : 'user',
+          status: 'active'
         };
         await setDoc(docRef, newProfile);
         
@@ -105,12 +114,16 @@ export function AuthProvider({ children }) {
       // Create profile in Firestore
       await setDoc(doc(db, 'profiles', user.uid), {
         username: username || email.split('@')[0],
-        email: email
+        email: email,
+        role: email === 'nickxmn6@gmail.com' ? 'dev' : 'user',
+        status: 'active'
       });
       
+      logSecurityEvent('SIGN_UP', user.uid, email, { username });
       return { data: { user }, error: null };
     } catch (error) {
       console.error('Error signing up:', error);
+      logSecurityEvent('SIGN_UP_FAILED', null, email, { error: error.message });
       return { data: null, error };
     }
   }
@@ -131,9 +144,11 @@ export function AuthProvider({ children }) {
       }));
       await fetchProfile(user.uid, user.email);
       
+      logSecurityEvent('SIGN_IN', user.uid, user.email);
       return { data: { user: userData }, error: null };
     } catch (error) {
       console.error('Error signing in:', error);
+      logSecurityEvent('SIGN_IN_FAILED', null, email, { error: error.message });
       return { data: null, error };
     }
   }
@@ -141,12 +156,14 @@ export function AuthProvider({ children }) {
   async function signOut() {
     try {
       const userId = user?.id;
+      const userEmail = user?.email;
       setUser(null);
       setProfile(null);
       localStorage.removeItem('fb-user');
       if (userId) localStorage.removeItem(`profile-${userId}`);
 
       await firebaseSignOut(auth);
+      if (userId) logSecurityEvent('SIGN_OUT', userId, userEmail);
       return { error: null };
     } catch (error) {
       console.error('Error signing out:', error);

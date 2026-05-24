@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Fungsi bantuan
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isDev() {
+      return isAuthenticated() && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'dev';
+    }
+
+    function isNotBanned() {
+      let profile = get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
+      return profile.status == 'active' || profile.role == 'dev';
+    }
+
+    // 1. PROFILES COLLECTION
+    match /profiles/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && request.auth.uid == userId 
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['username', 'lastSeenNotif'])
+                     || isDev();
+      allow delete: if isDev();
+    }
+
+    // 2. SETTINGS COLLECTION
+    match /settings/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isDev();
+    }
+
+    // 3. SECURITY LOGS COLLECTION
+    match /security_logs/{logId} {
+      allow read: if isDev();
+      allow create: if true;
+      allow update, delete: if false; 
+    }
+
+    // 4. GLOBAL COMMS COLLECTION (Real-time Chat)
+    match /global_chats/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isNotBanned();
+      allow update, delete: if isDev(); // Hanya dev yang bisa menghapus pesan
+    }
+
+    // 5. ATURAN GLOBAL (PENGGANTI {document=**})
+    // Jika kita pakai {document=**} mentah-mentah, maka aturan ketat di atas akan TERTIMPA 
+    // (karena Firestore mengizinkan akses jika *salah satu* aturan bernilai true).
+    // Oleh karena itu, kita buat pengecualian agar koleksi krusial tetap terkunci.
+    match /{collection}/{document=**} {
+      // Mengizinkan baca/tulis HANYA untuk user yang sudah login,
+      // KECUALI untuk koleksi yang sudah diatur khusus di atas.
+      allow read, write: if isAuthenticated() 
+                         && collection != 'profiles' 
+                         && collection != 'settings' 
+                         && collection != 'security_logs'
+                         && collection != 'global_chats';
+    }
+  }
+}
