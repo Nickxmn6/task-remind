@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Calendar, Home, LogOut, Settings, X, Menu } from 'lucide-react'
+import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
 
@@ -81,6 +81,14 @@ function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
         >
           <Calendar size={18} />
           <span className="text-sm font-medium">Schedule</span>
+        </NavLink>
+        <NavLink
+          to="/drive"
+          onClick={onNavClick}
+          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+        >
+          <HardDrive size={18} />
+          <span className="text-sm font-medium">Drive</span>
         </NavLink>
       </nav>
 

@@ -83,7 +83,8 @@ export function AuthProvider({ children }) {
       } else {
         // Create new profile if it doesn't exist
         const newProfile = { 
-          username: email?.split('@')[0] || 'User'
+          username: email?.split('@')[0] || 'User',
+          email: email || null
         };
         await setDoc(docRef, newProfile);
         
@@ -103,7 +104,8 @@ export function AuthProvider({ children }) {
       
       // Create profile in Firestore
       await setDoc(doc(db, 'profiles', user.uid), {
-        username: username || email.split('@')[0]
+        username: username || email.split('@')[0],
+        email: email
       });
       
       return { data: { user }, error: null };

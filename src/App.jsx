@@ -4,6 +4,7 @@ import AuthPage from './pages/AuthPage'
 import MainLayout from './components/MainLayout'
 import Dashboard from './pages/Dashboard'
 import Schedule from './pages/Schedule'
+import Drive from './pages/Drive'
 import { useEffect, useState } from 'react'
 
 // Premium splash screen
@@ -43,6 +44,7 @@ function AppRoutes() {
       }>
         <Route index element={<Dashboard />} />
         <Route path="schedule" element={<Schedule />} />
+        <Route path="drive" element={<Drive />} />
       </Route>
     </Routes>
   )
