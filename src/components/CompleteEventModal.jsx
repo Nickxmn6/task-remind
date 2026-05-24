@@ -5,13 +5,14 @@ export default function CompleteEventModal({ isOpen, onClose, event, onComplete 
   const [certificateFile, setCertificateFile] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!certificateFile) return
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
 
+    setCertificateFile(file)
     setLoading(true)
     try {
-      await onComplete(event.id, certificateFile)
+      await onComplete(event.id, file)
     } finally {
       setLoading(false)
       setCertificateFile(null)
@@ -52,7 +53,7 @@ export default function CompleteEventModal({ isOpen, onClose, event, onComplete 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <div className="p-6 space-y-5">
           {/* Event info */}
           <div className="text-center py-2">
             <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
@@ -67,27 +68,27 @@ export default function CompleteEventModal({ isOpen, onClose, event, onComplete 
             <input
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => setCertificateFile(e.target.files[0] || null)}
+              onChange={handleFileChange}
               className="hidden"
               disabled={loading}
             />
             <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200 ${
-              certificateFile
+              loading || certificateFile
                 ? 'border-emerald-500/50 bg-emerald-500/8'
                 : 'border-white/15 bg-white/3 group-hover:border-white/30 group-hover:bg-white/6'
             }`}>
-              {certificateFile ? (
-                <>
-                  <FileText size={28} className="mx-auto mb-2 text-emerald-400" />
-                  <p className="text-emerald-300 text-sm font-medium truncate">{certificateFile.name}</p>
-                  <p className="text-white/35 text-xs mt-1">{(certificateFile.size / 1024).toFixed(0)} KB</p>
-                </>
+              {loading || certificateFile ? (
+                <div className="py-2 animate-fade-in">
+                  <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-3" />
+                  <p className="text-emerald-400 text-sm font-medium">Uploading & Completing…</p>
+                  {certificateFile && <p className="text-emerald-300/70 text-xs mt-1 truncate px-4">{certificateFile.name}</p>}
+                </div>
               ) : (
-                <>
+                <div className="animate-fade-in">
                   <Upload size={28} className="mx-auto mb-2 text-white/30 group-hover:text-white/50 transition-colors" />
-                  <p className="text-white/50 text-sm">Click to upload certificate</p>
-                  <p className="text-white/25 text-xs mt-1">PDF, PNG, JPG — max 5 MB</p>
-                </>
+                  <p className="text-white/50 text-sm font-medium group-hover:text-white/70 transition-colors">Click to select certificate</p>
+                  <p className="text-white/25 text-xs mt-1.5">PDF, PNG, JPG — max 5 MB</p>
+                </div>
               )}
             </div>
           </label>
@@ -96,25 +97,8 @@ export default function CompleteEventModal({ isOpen, onClose, event, onComplete 
             <button type="button" onClick={handleClose} disabled={loading} className="btn-secondary flex-1">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading || !certificateFile}
-              className="btn-primary flex-1 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Completing…
-                </>
-              ) : (
-                <>
-                  <CheckCircle size={15} />
-                  Complete
-                </>
-              )}
-            </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )
