@@ -51,7 +51,7 @@ export default function FileModal({ isOpen, onClose, file, onDelete, onShare, on
       >
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[6px]" onClick={onClose} />
 
-        <div className="relative glass-card w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl rounded-b-none h-[85vh] sm:h-auto overflow-y-auto animate-scale-in">
+        <div className="relative glass-card w-full sm:max-w-md sm:rounded-lg rounded-t-3xl rounded-b-none h-[85vh] sm:h-auto overflow-y-auto animate-scale-in">
           <div className="flex justify-between items-center px-5 sm:px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0f172a]/80 backdrop-blur-md z-10">
           <div className="flex items-center gap-2">
             <File size={18} className="text-violet-400" />

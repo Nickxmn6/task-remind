@@ -14,10 +14,10 @@ export default function ToastNotification({ message, type, onClose }) {
   }, [onClose])
 
   return (
-    <div className={`fixed top-5 right-5 z-50 transition-all duration-500 ease-out ${
-      isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+    <div className={`fixed top-24 right-4 sm:top-5 sm:right-5 z-[9999] transition-all duration-500 ease-out ${
+      isVisible ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'
     }`}>
-      <div className={`rounded-2xl shadow-2xl backdrop-blur-xl p-4 min-w-[340px] border ${
+      <div className={`rounded-lg shadow-2xl backdrop-blur-xl p-4 min-w-[340px] border ${
         type === 'success' 
           ? 'bg-green-500/10 border-green-500/30' 
           : 'bg-red-500/10 border-red-500/30'

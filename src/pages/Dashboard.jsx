@@ -16,7 +16,7 @@ function StatCard({ label, value, icon: Icon, gradient, delay }) {
           <p className="text-white/45 text-[10px] md:text-xs font-semibold uppercase tracking-widest mb-1.5 md:mb-2 leading-tight">{label}</p>
           <p className="text-3xl md:text-4xl font-bold text-white leading-none">{value}</p>
         </div>
-        <div className={`w-9 h-9 md:w-11 md:h-11 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 ml-2 ${gradient}`}>
+        <div className={`w-9 h-9 md:w-11 md:h-11 rounded-xl md:rounded-lg flex items-center justify-center flex-shrink-0 ml-2 ${gradient}`}>
           <Icon size={17} className="text-white" />
         </div>
       </div>
@@ -40,14 +40,14 @@ export default function Dashboard() {
       label: 'Total Events',
       value: events.length,
       icon: Layers,
-      gradient: 'bg-gradient-to-br from-violet-500 to-purple-600',
+      gradient: 'bg-gradient-to-br from-violet-500 to-zinc-600',
       delay: '0ms',
     },
     {
       label: 'Upcoming (7d)',
       value: upcomingEvents.length,
       icon: Calendar,
-      gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+      gradient: 'bg-gradient-to-br from-zinc-500 to-zinc-600',
       delay: '60ms',
     },
     {
@@ -68,7 +68,7 @@ export default function Dashboard() {
       {/* ── Hero greeting ── */}
       <div className="glass-card p-5 md:p-7 relative overflow-hidden animate-slide-up">
         <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-violet-600/10 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-24 bg-gradient-to-t from-blue-600/8 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-24 bg-gradient-to-t from-zinc-600/8 to-transparent pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -99,7 +99,7 @@ export default function Dashboard() {
       <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: '180ms' }}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center">
               <Clock size={16} className="text-white" />
             </div>
             <h2 className="text-lg font-bold text-white">Upcoming Events</h2>

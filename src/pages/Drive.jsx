@@ -90,7 +90,7 @@ export default function Drive() {
               </div>
               <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full transition-all duration-300 ${upload.state === 'error' || upload.state === 'timeout' ? 'bg-red-500' : 'bg-gradient-to-r from-violet-500 to-purple-500'}`}
+                  className={`h-full transition-all duration-300 ${upload.state === 'error' || upload.state === 'timeout' ? 'bg-red-500' : 'bg-gradient-to-r from-violet-500 to-zinc-500'}`}
                   style={{ width: `${upload.progress}%` }}
                 />
               </div>
@@ -140,7 +140,7 @@ export default function Drive() {
         </div>
       ) : filteredFiles.length === 0 ? (
         <div className="glass-card p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-lg bg-white/5 flex items-center justify-center mx-auto mb-4">
             <HardDrive size={28} className="text-white/25" />
           </div>
           <p className="text-white/60 font-medium">

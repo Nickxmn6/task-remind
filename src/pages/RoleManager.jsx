@@ -91,7 +91,7 @@ export default function RoleManager() {
           <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Role Manager</h1>
           <p className="text-white/50 mt-1 text-sm md:text-base">Atur akses dan status pengguna.</p>
         </div>
-        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-lg bg-gradient-to-br from-zinc-500 to-zinc-600 flex items-center justify-center shadow-lg">
           <Shield className="text-white w-5 h-5 md:w-6 md:h-6" />
         </div>
       </header>
@@ -104,11 +104,11 @@ export default function RoleManager() {
           const isTimeout = u.status === 'timeout';
           
           return (
-            <div key={u.id} className={`glass-card p-4 rounded-2xl border border-white/5 ${isBanned ? 'opacity-60' : ''}`}>
+            <div key={u.id} className={`glass-card p-4 rounded-lg border border-white/5 ${isBanned ? 'opacity-60' : ''}`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${
-                    isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-purple-600'
+                    isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-zinc-600'
                   }`}>
                     {u.username?.[0]?.toUpperCase() || 'U'}
                   </div>
@@ -119,7 +119,7 @@ export default function RoleManager() {
                 </div>
                 <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                   u.role === 'dev' 
-                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                    ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30' 
                     : 'bg-white/10 text-white/70 border border-white/10'
                 }`}>
                   {u.role === 'dev' ? 'DEV' : 'USER'}
@@ -142,7 +142,7 @@ export default function RoleManager() {
                   value={u.role || 'user'}
                   onChange={(e) => handleRoleChange(u.id, e.target.value)}
                   disabled={saving === u.id || isMe}
-                  className="bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-purple-500 focus:border-purple-500 block w-full p-3 disabled:opacity-50 appearance-none text-center cursor-pointer hover:bg-white/10 transition"
+                  className="bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-zinc-500 focus:border-zinc-500 block w-full p-3 disabled:opacity-50 appearance-none text-center cursor-pointer hover:bg-white/10 transition"
                   style={{ colorScheme: 'dark' }}
                 >
                   <option value="user">Role: User</option>
@@ -153,14 +153,14 @@ export default function RoleManager() {
           );
         })}
         {users.length === 0 && (
-          <div className="p-8 text-center text-white/50 glass rounded-2xl">
+          <div className="p-8 text-center text-white/50 glass rounded-lg">
             Belum ada pengguna terdaftar.
           </div>
         )}
       </div>
 
       {/* DESKTOP VIEW (Table) */}
-      <div className="hidden md:block glass rounded-2xl overflow-hidden border border-white/5">
+      <div className="hidden md:block glass rounded-lg overflow-hidden border border-white/5">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -183,7 +183,7 @@ export default function RoleManager() {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg ${
-                          isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-purple-600'
+                          isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-zinc-600'
                         }`}>
                           {u.username?.[0]?.toUpperCase() || 'U'}
                         </div>
@@ -196,7 +196,7 @@ export default function RoleManager() {
                     <td className="py-4 px-6">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                         u.role === 'dev' 
-                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                          ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30' 
                           : 'bg-white/10 text-white/70 border border-white/10'
                       }`}>
                         {u.role === 'dev' ? <Shield size={12} className="mr-1.5" /> : <User size={12} className="mr-1.5" />}
@@ -229,7 +229,7 @@ export default function RoleManager() {
                           value={u.role || 'user'}
                           onChange={(e) => handleRoleChange(u.id, e.target.value)}
                           disabled={saving === u.id || isMe}
-                          className="bg-black/20 border border-white/10 text-white text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-28 p-2.5 disabled:opacity-50 appearance-none text-center cursor-pointer hover:bg-white/10 transition"
+                          className="bg-black/20 border border-white/10 text-white text-sm rounded-lg focus:ring-zinc-500 focus:border-zinc-500 block w-28 p-2.5 disabled:opacity-50 appearance-none text-center cursor-pointer hover:bg-white/10 transition"
                           style={{ colorScheme: 'dark' }}
                         >
                           <option value="user">User</option>

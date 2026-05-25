@@ -46,10 +46,10 @@ export default function WelcomeModal() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={handleClose} />
       
       <div 
-        className="relative w-[90vw] max-w-md glass rounded-3xl overflow-hidden shadow-2xl p-8"
+        className="relative w-[90vw] max-w-md glass rounded-xl overflow-hidden shadow-2xl p-8"
         style={{ animation: 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}
       >
-        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-purple-500/20 to-transparent pointer-events-none rounded-bl-full" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-zinc-500/20 to-transparent pointer-events-none rounded-bl-full" />
         
         <button
           onClick={handleClose}
@@ -58,7 +58,7 @@ export default function WelcomeModal() {
           <X size={18} />
         </button>
 
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl mb-6">
+        <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-zinc-500 to-zinc-600 flex items-center justify-center shadow-xl mb-6">
           <Megaphone className="text-white" size={28} />
         </div>
 

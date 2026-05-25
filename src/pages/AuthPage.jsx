@@ -30,14 +30,11 @@ export default function AuthPage() {
         console.log('Login result:', result)
         
         if (result.error) {
-          // Handle specific error messages
-          let errorMessage = 'Login gagal. Periksa email dan password Anda.'
-          if (result.error.message.includes('Invalid login credentials')) {
+          let errorMessage = 'Login gagal. Periksa kembali koneksi atau data Anda.'
+          if (result.error.message.includes('Invalid login credentials') || result.error.message.includes('invalid-credential')) {
             errorMessage = 'Email atau password salah!'
           } else if (result.error.message.includes('Email not confirmed')) {
             errorMessage = 'Email belum dikonfirmasi. Cek email Anda.'
-          } else {
-            errorMessage = result.error.message
           }
           showToast(errorMessage, 'error')
         } else {
@@ -63,13 +60,13 @@ export default function AuthPage() {
         console.log('Register result:', result)
         
         if (result.error) {
-          let errorMessage = 'Registrasi gagal.'
-          if (result.error.message.includes('already registered')) {
+          let errorMessage = 'Registrasi gagal. Silakan coba lagi.'
+          if (result.error.message.includes('already-in-use') || result.error.message.includes('already registered')) {
             errorMessage = 'Email sudah terdaftar. Silakan login.'
-          } else if (result.error.message.includes('password')) {
+          } else if (result.error.message.includes('password') || result.error.message.includes('weak-password')) {
             errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.'
-          } else {
-            errorMessage = result.error.message
+          } else if (result.error.message.includes('invalid-email')) {
+            errorMessage = 'Format email tidak valid.'
           }
           showToast(errorMessage, 'error')
         } else {
@@ -111,7 +108,7 @@ export default function AuthPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full glass mb-3 sm:mb-4 relative group">
               <Calendar size={28} className="text-white sm:hidden" />
               <Calendar size={36} className="text-white hidden sm:block" />
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-zinc-400 to-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
               EventHub
@@ -133,7 +130,7 @@ export default function AuthPage() {
                     className="glass-input pl-10 text-white placeholder-white/40 focus:placeholder-white/60 transition-all"
                     required={!isLogin}
                   />
-                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 group-focus-within:w-full transition-all duration-300 rounded-full"></div>
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-zinc-400 to-zinc-500 group-focus-within:w-full transition-all duration-300 rounded-full"></div>
                 </div>
               </div>
             )}
@@ -148,7 +145,7 @@ export default function AuthPage() {
                 className="glass-input pl-10 text-white placeholder-white/40 focus:placeholder-white/60 transition-all"
                 required
               />
-              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 group-focus-within:w-full transition-all duration-300 rounded-full"></div>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-zinc-400 to-zinc-500 group-focus-within:w-full transition-all duration-300 rounded-full"></div>
             </div>
             
             <div className="relative group">
@@ -161,7 +158,7 @@ export default function AuthPage() {
                 className="glass-input pl-10 text-white placeholder-white/40 focus:placeholder-white/60 transition-all"
                 required
               />
-              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 group-focus-within:w-full transition-all duration-300 rounded-full"></div>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-zinc-400 to-zinc-500 group-focus-within:w-full transition-all duration-300 rounded-full"></div>
             </div>
             
             <button
@@ -182,7 +179,7 @@ export default function AuthPage() {
                   </>
                 )}
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-zinc-600 to-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </form>
           
@@ -201,8 +198,8 @@ export default function AuthPage() {
           </div>
           
           {/* Decorative elements */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-zinc-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-zinc-500/10 rounded-full blur-2xl pointer-events-none"></div>
         </div>
       </div>
     </div>

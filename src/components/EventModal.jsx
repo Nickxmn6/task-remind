@@ -132,14 +132,14 @@ export default function EventModal({ isOpen, onClose, event, addEvent, updateEve
 
       {/* Dialog — centered, scrollable, di semua ukuran layar */}
       <div
-        className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto glass rounded-[20px]"
+        className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto glass rounded-lg"
         style={{ animation: 'scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
       >
 
         {/* ── Header ── */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-white/10 sticky top-0 glass rounded-t-[20px] z-10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center">
               <Sparkles size={16} className="text-white" />
             </div>
             <h2 className="text-lg font-bold text-white">
@@ -174,7 +174,7 @@ export default function EventModal({ isOpen, onClose, event, addEvent, updateEve
             <div className="flex items-center gap-4">
               {/* Preview / placeholder */}
               <div className="relative flex-shrink-0">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/15 bg-white/5 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-lg overflow-hidden border border-white/15 bg-white/5 flex items-center justify-center">
                   {photoPreview ? (
                     <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (

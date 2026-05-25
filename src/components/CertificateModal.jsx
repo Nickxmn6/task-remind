@@ -16,7 +16,7 @@ export default function CertificateModal({ isOpen, onClose, event }) {
 
       {/* Dialog */}
       <div
-        className="relative w-full max-w-2xl max-h-[90dvh] flex flex-col glass rounded-[20px] overflow-hidden"
+        className="relative w-full max-w-2xl max-h-[90dvh] flex flex-col glass rounded-lg overflow-hidden"
         style={{ animation: 'scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
       >
         {/* Header */}

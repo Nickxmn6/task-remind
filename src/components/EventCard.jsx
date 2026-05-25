@@ -57,7 +57,7 @@ export default function EventCard({ event, onEdit, onStatusUpdate, onViewCertifi
               className="w-full h-full object-cover min-h-full transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full min-h-[110px] bg-gradient-to-br from-violet-600/20 via-purple-600/15 to-indigo-600/20 flex items-center justify-center">
+            <div className="w-full h-full min-h-[110px] bg-gradient-to-br from-violet-600/20 via-zinc-600/15 to-zinc-600/20 flex items-center justify-center">
               <Calendar size={22} className="text-white/20" />
             </div>
           )}

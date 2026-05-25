@@ -49,7 +49,7 @@ export default function SettingsModal({ isOpen, onClose }) {
           {/* Avatar */}
           <div className="flex justify-center">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                 {username?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="absolute -bottom-1 -right-1 w-7 h-7 glass rounded-full flex items-center justify-center">

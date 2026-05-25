@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +19,7 @@ export default function GlobalComms() {
   // Image Preview State
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageCaption, setImageCaption] = useState('');
+  const [viewingImage, setViewingImage] = useState(null);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   
@@ -215,14 +217,14 @@ export default function GlobalComms() {
                   {/* Sender Info */}
                   {!isMe && (
                     <div className="flex items-center gap-2 mb-1 px-1">
-                      <span className={`text-xs font-bold ${isDev ? 'text-purple-400' : 'text-green-400'}`}>
+                      <span className={`text-xs font-bold ${isDev ? 'text-zinc-400' : 'text-green-400'}`}>
                         {msg.username}
                       </span>
                     </div>
                   )}
 
                   {/* Bubble */}
-                  <div className={`relative p-3 rounded-2xl shadow-xl border ${
+                  <div className={`relative p-3 rounded-lg shadow-xl border ${
                     isMe 
                       ? 'bg-green-500/10 border-green-500/20 rounded-br-sm' 
                       : 'bg-white/5 border-white/10 rounded-bl-sm'
@@ -235,7 +237,12 @@ export default function GlobalComms() {
                     {/* IMAGE */}
                     {msg.type === 'image' && (
                       <div className="space-y-2">
-                        <img src={msg.content} alt="Upload" className="rounded-xl max-h-64 object-cover" />
+                        <img 
+                          src={msg.content} 
+                          alt="Upload" 
+                          className="rounded-xl max-h-64 object-cover cursor-pointer hover:opacity-90 transition shadow-sm" 
+                          onClick={() => setViewingImage(msg.content)}
+                        />
                         {msg.caption && <p className="text-white/90 text-sm whitespace-pre-wrap">{msg.caption}</p>}
                       </div>
                     )}
@@ -245,7 +252,7 @@ export default function GlobalComms() {
                     {/* FILE */}
                     {msg.type === 'file' && (
                       <div className="flex items-center gap-3 bg-black/30 p-3 rounded-xl hover:bg-black/40 transition cursor-pointer" onClick={() => handleDownload(msg.fileId, msg.fileName)}>
-                        <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400">
+                        <div className="w-10 h-10 bg-zinc-500/20 rounded-lg flex items-center justify-center text-zinc-400">
                           <File size={20} />
                         </div>
                         <div>
@@ -292,7 +299,7 @@ export default function GlobalComms() {
           </div>
           
           {/* Text Input */}
-          <div className="flex-1 bg-black/20 border border-white/10 rounded-2xl flex items-center px-4 overflow-hidden relative">
+          <div className="flex-1 bg-black/20 border border-white/10 rounded-lg flex items-center px-4 overflow-hidden relative">
             <input
               type="text"
               value={text}
@@ -319,7 +326,7 @@ export default function GlobalComms() {
           </p>
           {activeUploads.map(up => (
             <div key={up.id} className="w-32 h-1 bg-white/10 rounded-full overflow-hidden mb-1">
-              <div className="h-full bg-indigo-500 transition-all" style={{ width: `${up.progress}%` }}></div>
+              <div className="h-full bg-zinc-500 transition-all" style={{ width: `${up.progress}%` }}></div>
             </div>
           ))}
         </div>
@@ -335,7 +342,7 @@ export default function GlobalComms() {
               </button>
             </div>
             
-            <div className="glass p-2 rounded-2xl shadow-2xl mb-6 max-h-[60vh] overflow-hidden">
+            <div className="glass p-2 rounded-lg shadow-2xl mb-6 max-h-[60vh] overflow-hidden">
               <img src={selectedImage} alt="Preview" className="w-full h-full object-contain rounded-xl max-h-[58vh]" />
             </div>
             
@@ -345,16 +352,39 @@ export default function GlobalComms() {
                 value={imageCaption}
                 onChange={(e) => setImageCaption(e.target.value)}
                 placeholder="Tambahkan keterangan (opsional)..."
-                className="flex-1 glass-input rounded-2xl py-4 px-6 text-white"
+                className="flex-1 glass-input rounded-lg py-4 px-6 text-white"
                 autoFocus
                 onKeyDown={(e) => { if(e.key === 'Enter') sendImageMessage() }}
               />
-              <button onClick={sendImageMessage} className="w-14 h-14 bg-green-500 hover:bg-green-400 text-black rounded-2xl flex items-center justify-center transition shadow-xl shadow-green-500/20">
+              <button onClick={sendImageMessage} className="w-14 h-14 bg-green-500 hover:bg-green-400 text-black rounded-lg flex items-center justify-center transition shadow-xl shadow-green-500/20">
                 <Send size={20} className="ml-1" />
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* FULL SCREEN IMAGE VIEW MODAL */}
+      {viewingImage && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-2 md:p-8 animate-fadeIn cursor-pointer"
+          onClick={() => setViewingImage(null)}
+        >
+          <div className="absolute top-0 left-0 w-full p-4 flex justify-end bg-gradient-to-b from-black/50 to-transparent z-50">
+            <button 
+              onClick={() => setViewingImage(null)} 
+              className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition shadow-xl backdrop-blur-sm"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <img 
+            src={viewingImage} 
+            alt="Full screen preview" 
+            className="max-w-full max-h-[100dvh] md:max-h-full object-contain shadow-2xl animate-scale-in relative z-40"
+          />
+        </div>,
+        document.body
       )}
       
       {/* Removed Audio Styles */}

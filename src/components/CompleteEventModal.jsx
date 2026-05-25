@@ -56,7 +56,7 @@ export default function CompleteEventModal({ isOpen, onClose, event, onComplete 
         <div className="p-4 sm:p-6 space-y-5">
           {/* Event info */}
           <div className="text-center py-2">
-            <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
               <CheckCircle size={26} className="text-emerald-400" />
             </div>
             <p className="text-white font-semibold">{event?.title}</p>

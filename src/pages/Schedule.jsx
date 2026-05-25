@@ -111,7 +111,7 @@ export default function Schedule() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="glass-card p-12 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-lg bg-white/5 flex items-center justify-center mx-auto mb-4">
               <CalendarDays size={28} className="text-white/25" />
             </div>
             <p className="text-white/60 font-medium">

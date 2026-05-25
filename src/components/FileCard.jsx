@@ -2,7 +2,7 @@ import { File, FileText, Image as ImageIcon, Archive, FileQuestion, Users } from
 
 export default function FileCard({ file, onClick }) {
   const getFileIcon = (type, name) => {
-    if (type.startsWith('image/')) return <ImageIcon size={24} className="text-blue-400" />
+    if (type.startsWith('image/')) return <ImageIcon size={24} className="text-zinc-400" />
     if (type.includes('pdf')) return <FileText size={24} className="text-red-400" />
     if (name.endsWith('.zip') || name.endsWith('.rar')) return <Archive size={24} className="text-amber-400" />
     if (type.startsWith('text/')) return <FileText size={24} className="text-gray-400" />
@@ -28,7 +28,7 @@ export default function FileCard({ file, onClick }) {
         </div>
       )}
       
-      <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+      <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
         {getFileIcon(file.type, file.name)}
       </div>
       

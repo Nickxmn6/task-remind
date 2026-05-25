@@ -42,8 +42,8 @@ function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
       {/* User card */}
       <div className="px-4 pt-4">
         <div className="glass rounded-xl p-3 flex items-center gap-3 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-purple-500/5 pointer-events-none" />
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg flex-shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-zinc-500/5 pointer-events-none" />
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center text-white font-bold text-base shadow-lg flex-shrink-0">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
@@ -162,7 +162,7 @@ export default function Sidebar() {
     <>
       {/* ═══ DESKTOP SIDEBAR ═══ */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-[17rem] flex-col" style={{ zIndex: 40 }}>
-        <div className="m-3 flex-1 glass flex flex-col rounded-2xl overflow-hidden">
+        <div className="m-3 flex-1 glass flex flex-col rounded-lg overflow-hidden">
           <SidebarInner
             profile={profile}
             onOpenSettings={() => setShowSettings(true)}
@@ -173,7 +173,7 @@ export default function Sidebar() {
 
       {/* ═══ MOBILE TOP NAVBAR ═══ */}
       <header className="md:hidden fixed top-0 left-0 right-0" style={{ zIndex: 40 }}>
-        <div className="glass mx-3 mt-3 rounded-2xl px-4 py-3 flex items-center justify-between">
+        <div className="glass mx-3 mt-3 rounded-lg px-4 py-3 flex items-center justify-between">
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
@@ -183,13 +183,13 @@ export default function Sidebar() {
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center">
               <Calendar size={14} className="text-white" />
             </div>
             <span className="text-white font-bold text-base tracking-tight">EventHub</span>
           </div>
 
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center text-white font-bold text-sm shadow">
             {profile?.username?.[0]?.toUpperCase() ?? 'U'}
           </div>
         </div>
