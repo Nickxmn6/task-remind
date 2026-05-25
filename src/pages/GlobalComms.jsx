@@ -245,6 +245,35 @@ export default function GlobalComms() {
     }
   }, [profile?.role, showToast]);
 
+  return (
+    <div className="flex flex-col h-[calc(100dvh-6rem)] max-w-4xl mx-auto relative z-10 animate-fadeIn">
+      {toast && <ToastNotification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
+      {/* HEADER */}
+      <header className="glass rounded-t-2xl p-4 flex items-center justify-between border-b border-white/5 shadow-md z-20">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
+            <Terminal className="text-white w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-green-400 tracking-tight flex items-center gap-2">
+              CHAT
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            </h1>
+            <p className="text-white/40 text-xs font-mono">End-to-End Encryption Enabled</p>
+          </div>
+        </div>
+      </header>
+
+      {/* CHAT AREA */}
+      <div className="flex-1 glass bg-black/40 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-white/30">
+            <Terminal size={48} className="mb-4 opacity-20" />
+            <p className="font-mono text-sm">INITIALIZING SECURE CHANNEL...</p>
+          </div>
+        )}
+        
         {messages.map((msg) => (
           <ChatMessage 
             key={msg.id} 
