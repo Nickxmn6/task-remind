@@ -194,17 +194,14 @@ export default function WebinarInfo() {
         const messageBody = newPostContent.trim()
         const shortMessage = messageBody.length > 50 ? messageBody.substring(0, 50) + '...' : messageBody
         
-        await fetch('https://onesignal.com/api/v1/notifications', {
+        await fetch('/api/sendNotification', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Authorization': 'Basic os_v2_app_5qfj4ezdzje7hm2cs6ebcxjz4s5jqhrp4f3udhfogbbgntc7gxjbvtt4mww7aoepu5rowhhrkvw4h5563nup4o4miyq4udao7e3sc3y'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            app_id: 'ec0a9e13-23ca-49f3-b342-9788115d39e4',
-            included_segments: ['Subscribed Users'],
-            headings: { en: `Info Webinar: ${profile?.username || 'User'}` },
-            contents: { en: shortMessage },
+            title: `Info Webinar: ${profile?.username || 'User'}`,
+            message: shortMessage,
             url: window.location.origin + '/webinar'
           })
         })
