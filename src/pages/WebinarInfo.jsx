@@ -194,7 +194,7 @@ export default function WebinarInfo() {
         const messageBody = newPostContent.trim()
         const shortMessage = messageBody.length > 50 ? messageBody.substring(0, 50) + '...' : messageBody
         
-        await fetch('/api/sendNotification', {
+        const res = await fetch('/api/sendNotification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -205,8 +205,21 @@ export default function WebinarInfo() {
             url: window.location.origin + '/webinar'
           })
         })
+        
+        const resData = await res.json();
+        if (!res.ok || !resData.success) {
+           alert("Gagal memanggil API Notif: " + JSON.stringify(resData));
+        } else if (resData.data?.errors) {
+           alert("Notif gagal disebar (Error dari OneSignal): " + JSON.stringify(resData.data.errors));
+        } else if (resData.data?.recipients === 0) {
+           alert("Postingan berhasil! Tapi Notif gagal disebar karena belum ada HP yang klik 'Allow' (0 penerima). Pastikan Anda membuka web ini di HP dan menerima perizinannya.");
+        } else {
+           // Success!
+           console.log("Notif berhasil dikirim ke " + resData.data?.recipients + " perangkat");
+        }
       } catch (err) {
         console.error('Failed to send OneSignal notification:', err)
+        alert("Terjadi kesalahan saat memanggil server notifikasi: " + err.message)
       }
 
       setNewPostContent('')
