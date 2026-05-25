@@ -205,16 +205,23 @@ export default function WebinarInfo() {
             url: window.location.origin + '/webinar'
           })
         })
-        
-        const resData = await res.json();
+        const resText = await res.text();
+        let resData;
+        try {
+          resData = JSON.parse(resText);
+        } catch (e) {
+          console.error("Non-JSON response from server:", resText);
+          alert("Gagal memanggil API Notif (Server Error): " + res.status);
+          return;
+        }
+
         if (!res.ok || !resData.success) {
            alert("Gagal memanggil API Notif: " + JSON.stringify(resData));
         } else if (resData.data?.errors) {
            alert("Notif gagal disebar (Error dari OneSignal): " + JSON.stringify(resData.data.errors));
         } else if (resData.data?.recipients === 0) {
-           alert("Postingan berhasil! Tapi Notif gagal disebar karena belum ada HP yang klik 'Allow' (0 penerima). Pastikan Anda membuka web ini di HP dan menerima perizinannya.");
+           alert("Postingan berhasil! Tapi Notif gagal disebar karena belum ada HP yang mengizinkan notifikasi.");
         } else {
-           // Success!
            console.log("Notif berhasil dikirim ke " + resData.data?.recipients + " perangkat");
         }
       } catch (err) {
