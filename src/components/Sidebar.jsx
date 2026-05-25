@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive, Shield, Megaphone, Terminal } from 'lucide-react'
+import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive, Shield, Megaphone, Terminal, Radio } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
 
@@ -97,6 +97,14 @@ function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
         >
           <Terminal size={18} />
           <span className="text-sm font-medium">Chat</span>
+        </NavLink>
+        <NavLink
+          to="/webinar"
+          onClick={onNavClick}
+          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+        >
+          <Radio size={18} />
+          <span className="text-sm font-medium">Webinar Info</span>
         </NavLink>
         {profile?.role === 'dev' && (
           <>

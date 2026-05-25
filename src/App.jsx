@@ -13,6 +13,7 @@ const Drive = lazy(() => import('./pages/Drive'))
 const RoleManager = lazy(() => import('./pages/RoleManager'))
 const AdminPanel = lazy(() => import('./pages/AdminPanel'))
 const GlobalComms = lazy(() => import('./pages/GlobalComms'))
+const WebinarInfo = lazy(() => import('./pages/WebinarInfo'))
 
 // Premium splash screen
 function SplashScreen() {
@@ -122,6 +123,7 @@ function AppRoutes() {
           <Route path="schedule" element={<Schedule />} />
           <Route path="drive" element={<Drive />} />
           <Route path="comms" element={<GlobalComms />} />
+          <Route path="webinar" element={<WebinarInfo />} />
           <Route path="roles" element={
             <DevRoute>
               <RoleManager />

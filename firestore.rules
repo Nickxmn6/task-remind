@@ -47,6 +47,14 @@ service cloud.firestore {
       allow update, delete: if isDev(); // Hanya dev yang bisa menghapus pesan
     }
 
+    // 5. WEBINARS COLLECTION
+    match /webinars/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isNotBanned();
+      allow update: if isAuthenticated(); 
+      allow delete: if isDev() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
+    }
+
     // 5. ATURAN GLOBAL (PENGGANTI {document=**})
     // Jika kita pakai {document=**} mentah-mentah, maka aturan ketat di atas akan TERTIMPA 
     // (karena Firestore mengizinkan akses jika *salah satu* aturan bernilai true).
@@ -58,7 +66,8 @@ service cloud.firestore {
                          && collection != 'profiles' 
                          && collection != 'settings' 
                          && collection != 'security_logs'
-                         && collection != 'global_chats';
+                         && collection != 'global_chats'
+                         && collection != 'webinars';
     }
   }
 }
