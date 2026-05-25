@@ -3,11 +3,15 @@ import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, CheckCircle2, Trash
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
+import { TextWithMentions } from '../components/TextWithMentions'
+import MentionAutocompleteBar from '../components/MentionAutocompleteBar'
+import { useUsers } from '../hooks/useUsers'
+import { processMentions } from '../lib/notifyMention'
 import { formatDistanceToNow, format } from 'date-fns'
 import { id } from 'date-fns/locale'
 
-// Helper function to compress images
-const compressImage = (file, maxWidth = 1024, quality = 0.7) => {
+// Helper function untuk kompresi gambar 
+const compressImage = (file, maxWidth = 800) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -15,28 +19,21 @@ const compressImage = (file, maxWidth = 1024, quality = 0.7) => {
       const img = new Image();
       img.src = event.target.result;
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-
         const canvas = document.createElement('canvas');
+        const ratio = maxWidth / img.width;
+        const width = img.width > maxWidth ? maxWidth : img.width;
+        const height = img.width > maxWidth ? img.height * ratio : img.height;
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        
-        // Output as base64 string
         resolve(canvas.toDataURL('image/jpeg', 0.6));
       };
     };
   });
 };
 
-const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, onComment, currentUserId, currentUserProfile }) {
+const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, onComment, currentUserId, currentUserProfile, users }) {
   const [showComments, setShowComments] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
@@ -162,7 +159,7 @@ const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, onCo
             {/* Body */}
             {post.content && (
               <div className="mt-1 text-[15px] text-white/90 leading-relaxed whitespace-pre-wrap break-words">
-                {post.content}
+                <TextWithMentions text={post.content} />
               </div>
             )}
 
@@ -205,7 +202,9 @@ const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, onCo
                             <span className="font-semibold text-white">{comment.username}</span>
                             {comment.role === 'dev' && <CheckCircle2 size={12} className="text-blue-400" />}
                           </div>
-                          <p className="text-white/80 whitespace-pre-wrap">{comment.text}</p>
+                          <p className="text-white/80 whitespace-pre-wrap">
+                            <TextWithMentions text={comment.text} />
+                          </p>
                         </div>
                       </div>
                     ))
@@ -219,13 +218,21 @@ const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, onCo
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-zinc-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                     {currentUserProfile?.username?.[0]?.toUpperCase() ?? 'U'}
                   </div>
-                  <input
-                    type="text"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Tulis balasan..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 transition-colors"
-                  />
+                  <div className="flex-1 relative">
+                    <MentionAutocompleteBar 
+                      text={commentText} 
+                      users={users || []} 
+                      onSelect={setCommentText}
+                      onCancel={() => {}}
+                    />
+                    <input
+                      type="text"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Tulis balasan..."
+                      className="w-full bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 transition-colors"
+                    />
+                  </div>
                   <button 
                     type="submit"
                     disabled={!commentText.trim()}
@@ -272,6 +279,7 @@ const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, onCo
 
 export default function WebinarInfo() {
   const { user, profile } = useAuth()
+  const { users } = useUsers()
   const [posts, setPosts] = useState([])
   const [newPostContent, setNewPostContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -348,11 +356,14 @@ export default function WebinarInfo() {
         comments: arrayUnion(newComment),
         commentsCount: (currentPost?.commentsCount || 0) + 1
       });
+      
+      // Notify mentioned users
+      processMentions(commentText, users, profile, 'Webinar Info (Komentar)');
     } catch (error) {
       console.error("Error adding comment:", error);
       alert("Gagal mengirim komentar: " + error.message);
     }
-  }, [user, profile, posts]);
+  }, [user, profile, posts, users]);
 
   const handleSubmitPost = async (e) => {
     e.preventDefault()
@@ -384,9 +395,12 @@ export default function WebinarInfo() {
       // Jika ada gambar, kita tunggu sampai addDoc selesai agar aman
       if (selectedImage) {
         await addDoc(collection(db, 'webinars'), postData);
+        processMentions(newPostContent, users, profile, 'Webinar Info (Postingan)');
       } else {
         // Optimistic update: Jangan ditunggu jika hanya teks! Biarkan berjalan di background.
-        addDoc(collection(db, 'webinars'), postData).catch(error => {
+        addDoc(collection(db, 'webinars'), postData).then(() => {
+          processMentions(newPostContent, users, profile, 'Webinar Info (Postingan)');
+        }).catch(error => {
           console.error("Error background posting:", error);
           alert("Gagal memposting (Teks): " + error.message);
         });
@@ -446,13 +460,21 @@ export default function WebinarInfo() {
               </div>
             )}
 
-            <textarea
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-              placeholder="Mulai thread baru..."
-              className="w-full bg-transparent border-none text-[15px] text-white placeholder:text-white/40 focus:ring-0 resize-none outline-none min-h-[44px]"
-              rows={newPostContent.split('\n').length > 1 ? Math.min(newPostContent.split('\n').length, 5) : 1}
-            />
+            <div className="relative">
+              <MentionAutocompleteBar 
+                text={newPostContent} 
+                users={users || []} 
+                onSelect={setNewPostContent}
+                onCancel={() => {}}
+              />
+              <textarea
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                placeholder="Mulai thread baru..."
+                className="w-full bg-transparent border-none text-[15px] text-white placeholder:text-white/40 focus:ring-0 resize-none outline-none min-h-[44px]"
+                rows={newPostContent.split('\n').length > 1 ? Math.min(newPostContent.split('\n').length, 5) : 1}
+              />
+            </div>
             
             <div className="flex items-center justify-between mt-2 border-t border-white/5 pt-3">
               <div>
@@ -500,17 +522,20 @@ export default function WebinarInfo() {
               <p className="text-white/40 text-sm">Memuat timeline...</p>
             </div>
           ) : posts.length > 0 ? (
-            posts.map(post => (
-              <ThreadPost 
-                key={post.id} 
-                post={post} 
-                onLike={handleLike}
-                onDelete={handleDelete}
-                onComment={handleComment}
-                currentUserId={user?.id} 
-                currentUserProfile={profile}
-              />
-            ))
+            <div className="divide-y divide-white/5">
+              {posts.map(post => (
+                <ThreadPost 
+                  key={post.id} 
+                  post={post} 
+                  users={users}
+                  onLike={handleLike}
+                  onDelete={handleDelete}
+                  onComment={handleComment}
+                  currentUserId={user?.id} 
+                  currentUserProfile={profile}
+                />
+              ))}
+            </div>
           ) : (
             <div className="p-12 text-center">
               <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">

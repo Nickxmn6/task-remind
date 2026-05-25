@@ -4,12 +4,17 @@ import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp,
 import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import { useDrive } from '../hooks/useDrive';
+import { TextWithMentions } from '../components/TextWithMentions';
+import MentionAutocompleteBar from '../components/MentionAutocompleteBar';
+import { useUsers } from '../hooks/useUsers';
+import { processMentions } from '../lib/notifyMention';
 import { Send, Image as ImageIcon, Paperclip, X, File, Loader, Terminal, Trash2 } from 'lucide-react';
 import ToastNotification from '../components/ToastNotification';
 import { useToast } from '../hooks/useToast';
 
 export default function GlobalComms() {
   const { profile } = useAuth();
+  const { users } = useUsers();
   const { toast, showToast, setToast } = useToast();
   const { startUpload, downloadFile, activeUploads } = useDrive();
 
@@ -63,6 +68,9 @@ export default function GlobalComms() {
         role: profile?.role || 'user',
         timestamp: serverTimestamp()
       });
+      
+      // Notify mentioned users
+      processMentions(msg, users, profile, 'Global Chat');
     } catch (error) {
       showToast('Gagal mengirim pesan.', 'error');
     }
@@ -115,6 +123,11 @@ export default function GlobalComms() {
         role: profile?.role || 'user',
         timestamp: serverTimestamp()
       });
+      
+      // Notify mentioned users in caption
+      if (caption) {
+        processMentions(caption, users, profile, 'Global Chat');
+      }
     } catch (error) {
       showToast('Gagal mengirim gambar.', 'error');
     }
@@ -230,7 +243,9 @@ export default function GlobalComms() {
                     }`}>
                     {/* TEXT */}
                     {msg.type === 'text' && (
-                      <p className="text-white/90 text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      <p className="text-white/90 text-sm whitespace-pre-wrap leading-relaxed">
+                        <TextWithMentions text={msg.content} />
+                      </p>
                     )}
 
                     {/* IMAGE */}
@@ -242,7 +257,11 @@ export default function GlobalComms() {
                           className="rounded-xl max-h-64 object-cover cursor-pointer hover:opacity-90 transition shadow-sm"
                           onClick={() => setViewingImage(msg.content)}
                         />
-                        {msg.caption && <p className="text-white/90 text-sm whitespace-pre-wrap">{msg.caption}</p>}
+                        {msg.caption && (
+                          <p className="text-white/90 text-sm whitespace-pre-wrap">
+                            <TextWithMentions text={msg.caption} />
+                          </p>
+                        )}
                       </div>
                     )}
 
@@ -282,38 +301,36 @@ export default function GlobalComms() {
 
       {/* INPUT AREA */}
       <div className="glass rounded-b-2xl p-4 border-t border-white/5 z-20">
-        <form onSubmit={sendTextMessage} className="flex items-end gap-2">
-
-          {/* Attachments */}
-          <div className="flex gap-1 mb-1">
-            <button type="button" onClick={() => imageInputRef.current?.click()} className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition">
-              <ImageIcon size={18} />
-            </button>
-            <input type="file" accept="image/*" className="hidden" ref={imageInputRef} onChange={handleImageSelect} />
-
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition">
-              <Paperclip size={18} />
-            </button>
-            <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />
-          </div>
-
-          {/* Text Input */}
-          <div className="flex-1 bg-black/20 border border-white/10 rounded-lg flex items-center px-4 overflow-hidden relative">
+        <form onSubmit={sendTextMessage} className="flex items-center gap-2">
+          <button type="button" onClick={() => imageInputRef.current?.click()} className="p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-xl transition">
+            <ImageIcon size={20} />
+          </button>
+          <input type="file" accept="image/*" className="hidden" ref={imageInputRef} onChange={handleImageSelect} />
+          
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-xl transition">
+            <Paperclip size={20} />
+          </button>
+          <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />
+          
+          <div className="flex-1 relative">
+            <MentionAutocompleteBar 
+              text={text} 
+              users={users} 
+              onSelect={setText}
+              onCancel={() => {}}
+            />
             <input
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Ketik pesan..."
-              className="w-full py-3 bg-transparent border-none focus:outline-none text-white text-sm font-mono placeholder:text-white/20"
+              placeholder="Ketik pesan rahasia..."
+              className="w-full bg-black/20 border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500/50 transition"
             />
           </div>
-
-          {/* Send Button */}
-          <div className="mb-0.5">
-            <button type="submit" className={`w-11 h-11 rounded-xl flex items-center justify-center transition shadow-lg ${text.trim() ? 'bg-green-500 hover:bg-green-400 text-black shadow-green-500/20' : 'bg-white/10 text-white/30'}`}>
-              <Send size={18} className="ml-0.5" />
-            </button>
-          </div>
+          
+          <button type="submit" disabled={!text.trim()} className="p-3 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-xl transition">
+            <Send size={20} />
+          </button>
         </form>
       </div>
 
@@ -345,16 +362,23 @@ export default function GlobalComms() {
               <img src={selectedImage} alt="Preview" className="w-full h-full object-contain rounded-xl max-h-[58vh]" />
             </div>
 
-            <div className="w-full flex gap-3">
+            <div className="w-full relative">
+              <MentionAutocompleteBar 
+                text={imageCaption} 
+                users={users} 
+                onSelect={setImageCaption}
+                onCancel={() => {}}
+              />
               <input
                 type="text"
                 value={imageCaption}
                 onChange={(e) => setImageCaption(e.target.value)}
                 placeholder="Tambahkan keterangan (opsional)..."
-                className="flex-1 glass-input rounded-lg py-4 px-6 text-white"
-                autoFocus
-                onKeyDown={(e) => { if (e.key === 'Enter') sendImageMessage() }}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
               />
+            </div>
+
+            <div className="w-full flex justify-end mt-4">
               <button onClick={sendImageMessage} className="w-14 h-14 bg-green-500 hover:bg-green-400 text-black rounded-lg flex items-center justify-center transition shadow-xl shadow-green-500/20">
                 <Send size={20} className="ml-1" />
               </button>

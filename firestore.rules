@@ -55,7 +55,13 @@ service cloud.firestore {
       allow delete: if isDev() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
     }
 
-    // 5. ATURAN GLOBAL (PENGGANTI {document=**})
+    // 6. NOTIFICATIONS COLLECTION
+    match /notifications/{docId} {
+      allow read, update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated() && isNotBanned();
+    }
+
+    // 7. ATURAN GLOBAL (PENGGANTI {document=**})
     // Jika kita pakai {document=**} mentah-mentah, maka aturan ketat di atas akan TERTIMPA 
     // (karena Firestore mengizinkan akses jika *salah satu* aturan bernilai true).
     // Oleh karena itu, kita buat pengecualian agar koleksi krusial tetap terkunci.
@@ -67,7 +73,8 @@ service cloud.firestore {
                          && collection != 'settings' 
                          && collection != 'security_logs'
                          && collection != 'global_chats'
-                         && collection != 'webinars';
+                         && collection != 'webinars'
+                         && collection != 'notifications';
     }
   }
 }

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive, Shield, Megaphone, Terminal, Radio } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
+import NotificationsDropdown from './NotificationsDropdown'
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 function LiveClock() {
@@ -72,12 +73,15 @@ function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
               <span className="text-emerald-400/80 text-xs">Online</span>
             </div>
           </div>
-          <button
-            onClick={onOpenSettings}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition flex-shrink-0"
-          >
-            <Settings size={15} />
-          </button>
+          <div className="flex flex-col gap-1 flex-shrink-0">
+            <NotificationsDropdown userId={profile?.id} />
+            <button
+              onClick={onOpenSettings}
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition"
+            >
+              <Settings size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
