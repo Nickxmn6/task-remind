@@ -12,6 +12,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>EventHub — Manage Your Events</title>
     <meta name="description" content="Kelola event, jadwal, dan reminder kamu dengan tampilan premium liquid glass." />
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "ec0a9e13-23ca-49f3-b342-9788115d39e4",
+        });
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

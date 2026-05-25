@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -7,6 +7,90 @@ import { useDrive } from '../hooks/useDrive';
 import { Send, Image as ImageIcon, Paperclip, X, File, Loader, Terminal, Trash2 } from 'lucide-react';
 import ToastNotification from '../components/ToastNotification';
 import { useToast } from '../hooks/useToast';
+
+const formatTime = (time) => {
+  if (!time) return '';
+  const d = time.toDate ? time.toDate() : new Date(time);
+  return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+};
+
+const ChatMessage = React.memo(function ChatMessage({ msg, profile, handleDeleteMessage, setViewingImage, handleDownload }) {
+  const isMe = msg.userId === profile?.id;
+  const isDev = msg.role === 'dev';
+
+  return (
+    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group`}>
+      <div className="flex items-end gap-2 max-w-[85%] md:max-w-[70%]">
+        {/* Delete button (Dev only) */}
+        {profile?.role === 'dev' && isMe && (
+          <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
+            <Trash2 size={14} />
+          </button>
+        )}
+
+        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+          {/* Sender Info */}
+          {!isMe && (
+            <div className="flex items-center gap-2 mb-1 px-1">
+              <span className={`text-xs font-bold ${isDev ? 'text-zinc-400' : 'text-green-400'}`}>
+                {msg.username}
+              </span>
+            </div>
+          )}
+
+          {/* Bubble */}
+          <div className={`relative p-3 rounded-lg shadow-xl border ${
+            isMe 
+              ? 'bg-green-500/10 border-green-500/20 rounded-br-sm' 
+              : 'bg-white/5 border-white/10 rounded-bl-sm'
+          }`}>
+            {/* TEXT */}
+            {msg.type === 'text' && (
+              <p className="text-white/90 text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+            )}
+            
+            {/* IMAGE */}
+            {msg.type === 'image' && (
+              <div className="space-y-2">
+                <img 
+                  src={msg.content} 
+                  alt="Upload" 
+                  className="rounded-xl max-h-64 object-cover cursor-pointer hover:opacity-90 transition shadow-sm" 
+                  onClick={() => setViewingImage(msg.content)}
+                />
+                {msg.caption && <p className="text-white/90 text-sm whitespace-pre-wrap">{msg.caption}</p>}
+              </div>
+            )}
+            
+            {/* FILE */}
+            {msg.type === 'file' && (
+              <div className="flex items-center gap-3 bg-black/30 p-3 rounded-xl hover:bg-black/40 transition cursor-pointer" onClick={() => handleDownload(msg.fileId, msg.fileName)}>
+                <div className="w-10 h-10 bg-zinc-500/20 rounded-lg flex items-center justify-center text-zinc-400">
+                  <File size={20} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white/90 truncate max-w-[150px] md:max-w-[200px]">{msg.fileName}</p>
+                  <p className="text-xs text-white/40">{(msg.fileSize / 1024).toFixed(1)} KB • Klik untuk unduh</p>
+                </div>
+              </div>
+            )}
+
+            <span className="text-[10px] text-white/30 font-mono mt-1.5 block text-right">
+              {formatTime(msg.timestamp)}
+            </span>
+          </div>
+        </div>
+
+        {/* Delete button (Dev only - left side for others' messages) */}
+        {profile?.role === 'dev' && !isMe && (
+          <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+});
 
 export default function GlobalComms() {
   const { profile } = useAuth();
@@ -148,136 +232,29 @@ export default function GlobalComms() {
     }
   };
   
-  const handleDownload = async (fileId, fileName) => {
+  const handleDownload = useCallback(async (fileId, fileName) => {
      showToast('Mendownload file...', 'success');
      await downloadFile({ id: fileId, name: fileName });
-  };
+  }, [downloadFile, showToast]);
 
-  const handleDeleteMessage = async (id) => {
+  const handleDeleteMessage = useCallback(async (id) => {
     if (profile?.role !== 'dev') return;
     if (window.confirm('Hapus pesan ini secara permanen?')) {
       await deleteDoc(doc(db, 'global_chats', id));
       showToast('Pesan dihapus.', 'success');
     }
-  };
+  }, [profile?.role, showToast]);
 
-  const formatTime = (time) => {
-    if (!time) return '';
-    const d = time.toDate ? time.toDate() : new Date(time);
-    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  // Removed formatSeconds
-
-  return (
-    <div className="flex flex-col h-[calc(100dvh-6rem)] max-w-4xl mx-auto relative z-10 animate-fadeIn">
-      {toast && <ToastNotification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      
-      {/* HEADER */}
-      <header className="glass rounded-t-2xl p-4 flex items-center justify-between border-b border-white/5 shadow-md z-20">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
-            <Terminal className="text-white w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-green-400 tracking-tight flex items-center gap-2">
-              CHAT
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            </h1>
-            <p className="text-white/40 text-xs font-mono">End-to-End Encryption Enabled</p>
-          </div>
-        </div>
-      </header>
-
-      {/* CHAT AREA */}
-      <div className="flex-1 glass bg-black/40 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-white/30">
-            <Terminal size={48} className="mb-4 opacity-20" />
-            <p className="font-mono text-sm">INITIALIZING SECURE CHANNEL...</p>
-          </div>
-        )}
-        
-        {messages.map((msg) => {
-          const isMe = msg.userId === profile?.id;
-          const isDev = msg.role === 'dev';
-          
-          return (
-            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group`}>
-              <div className="flex items-end gap-2 max-w-[85%] md:max-w-[70%]">
-                
-                {/* Delete button (Dev only) */}
-                {profile?.role === 'dev' && isMe && (
-                  <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
-                    <Trash2 size={14} />
-                  </button>
-                )}
-
-                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                  {/* Sender Info */}
-                  {!isMe && (
-                    <div className="flex items-center gap-2 mb-1 px-1">
-                      <span className={`text-xs font-bold ${isDev ? 'text-zinc-400' : 'text-green-400'}`}>
-                        {msg.username}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Bubble */}
-                  <div className={`relative p-3 rounded-lg shadow-xl border ${
-                    isMe 
-                      ? 'bg-green-500/10 border-green-500/20 rounded-br-sm' 
-                      : 'bg-white/5 border-white/10 rounded-bl-sm'
-                  }`}>
-                    {/* TEXT */}
-                    {msg.type === 'text' && (
-                      <p className="text-white/90 text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                    )}
-                    
-                    {/* IMAGE */}
-                    {msg.type === 'image' && (
-                      <div className="space-y-2">
-                        <img 
-                          src={msg.content} 
-                          alt="Upload" 
-                          className="rounded-xl max-h-64 object-cover cursor-pointer hover:opacity-90 transition shadow-sm" 
-                          onClick={() => setViewingImage(msg.content)}
-                        />
-                        {msg.caption && <p className="text-white/90 text-sm whitespace-pre-wrap">{msg.caption}</p>}
-                      </div>
-                    )}
-                    
-                    {/* Removed AUDIO */}
-                    
-                    {/* FILE */}
-                    {msg.type === 'file' && (
-                      <div className="flex items-center gap-3 bg-black/30 p-3 rounded-xl hover:bg-black/40 transition cursor-pointer" onClick={() => handleDownload(msg.fileId, msg.fileName)}>
-                        <div className="w-10 h-10 bg-zinc-500/20 rounded-lg flex items-center justify-center text-zinc-400">
-                          <File size={20} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white/90 truncate max-w-[150px] md:max-w-[200px]">{msg.fileName}</p>
-                          <p className="text-xs text-white/40">{(msg.fileSize / 1024).toFixed(1)} KB • Klik untuk unduh</p>
-                        </div>
-                      </div>
-                    )}
-
-                    <span className="text-[10px] text-white/30 font-mono mt-1.5 block text-right">
-                      {formatTime(msg.timestamp)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Delete button (Dev only - left side for others' messages) */}
-                {profile?.role === 'dev' && !isMe && (
-                  <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {messages.map((msg) => (
+          <ChatMessage 
+            key={msg.id} 
+            msg={msg} 
+            profile={profile} 
+            handleDeleteMessage={handleDeleteMessage} 
+            setViewingImage={setViewingImage} 
+            handleDownload={handleDownload} 
+          />
+        ))}
         <div ref={messagesEndRef} />
       </div>
 

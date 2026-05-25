@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, CheckCircle2, Trash2 } from 'lucide-react'
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { formatDistanceToNow, format } from 'date-fns'
 import { id } from 'date-fns/locale'
 
-function ThreadPost({ post, onLike, onDelete, currentUserId }) {
+const ThreadPost = React.memo(function ThreadPost({ post, onLike, onDelete, currentUserId }) {
   const hasLiked = post.likes?.includes(currentUserId)
   const isVerified = post.author.role === 'dev' || post.author.role === 'admin'
   const isAuthor = post.authorId === currentUserId
@@ -110,7 +110,7 @@ function ThreadPost({ post, onLike, onDelete, currentUserId }) {
       </div>
     </div>
   )
-}
+})
 
 export default function WebinarInfo() {
   const { user, profile } = useAuth()
@@ -121,32 +121,12 @@ export default function WebinarInfo() {
 
   const currentUserInitials = profile?.username?.[0]?.toUpperCase() ?? 'U'
 
-  // Minta izin notifikasi saat komponen dimuat
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission()
-    }
-  }, [])
 
   useEffect(() => {
     let isInitialLoad = true
     const q = query(collection(db, 'webinars'), orderBy('createdAt', 'desc'))
     const unsubscribe = onSnapshot(q, (snapshot) => {
       
-      // Trigger notification untuk post baru
-      if (!isInitialLoad && 'Notification' in window && Notification.permission === 'granted') {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
-            const data = change.doc.data()
-            // Jangan beri notifikasi jika yang posting adalah diri sendiri
-            if (user && data.authorId !== user.id) {
-               new Notification(`Info Webinar: ${data.author.name}`, {
-                 body: data.content.substring(0, 60) + (data.content.length > 60 ? '...' : ''),
-               })
-            }
-          }
-        })
-      }
 
       const postsData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -160,7 +140,7 @@ export default function WebinarInfo() {
     return () => unsubscribe()
   }, [user])
 
-  const handleLike = async (postId, hasLiked) => {
+  const handleLike = useCallback(async (postId, hasLiked) => {
     if (!user) return
     const postRef = doc(db, 'webinars', postId)
     try {
@@ -176,9 +156,9 @@ export default function WebinarInfo() {
     } catch (error) {
       console.error("Error toggling like:", error)
     }
-  }
+  }, [user])
 
-  const handleDelete = async (postId) => {
+  const handleDelete = useCallback(async (postId) => {
     if (window.confirm("Apakah Anda yakin ingin menghapus postingan ini?")) {
       try {
         await deleteDoc(doc(db, 'webinars', postId))
@@ -187,7 +167,7 @@ export default function WebinarInfo() {
         alert("Gagal menghapus: " + error.message)
       }
     }
-  }
+  }, [])
 
   const handleSubmitPost = async (e) => {
     e.preventDefault()
@@ -208,6 +188,30 @@ export default function WebinarInfo() {
         repostsCount: 0,
         createdAt: serverTimestamp()
       })
+
+      // Kirim Push Notification via OneSignal
+      try {
+        const messageBody = newPostContent.trim()
+        const shortMessage = messageBody.length > 50 ? messageBody.substring(0, 50) + '...' : messageBody
+        
+        await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': 'Basic os_v2_app_5qfj4ezdzje7hm2cs6ebcxjz4s5jqhrp4f3udhfogbbgntc7gxjbvtt4mww7aoepu5rowhhrkvw4h5563nup4o4miyq4udao7e3sc3y'
+          },
+          body: JSON.stringify({
+            app_id: 'ec0a9e13-23ca-49f3-b342-9788115d39e4',
+            included_segments: ['Subscribed Users'],
+            headings: { en: `Info Webinar: ${profile?.username || 'User'}` },
+            contents: { en: shortMessage },
+            url: window.location.origin + '/webinar'
+          })
+        })
+      } catch (err) {
+        console.error('Failed to send OneSignal notification:', err)
+      }
+
       setNewPostContent('')
     } catch (error) {
       console.error("Error adding post: ", error)
