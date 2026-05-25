@@ -188,8 +188,8 @@ export default function AdminPanel() {
             </div>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
+          <div className="overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10">
+            <table className="w-full text-left border-collapse text-sm min-w-[600px]">
               <thead>
                 <tr className="bg-black/20 text-white/40">
                   <th className="py-3 px-4 font-medium">Waktu</th>

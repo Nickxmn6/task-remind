@@ -70,7 +70,7 @@ export default function Schedule() {
           </div>
 
           {/* Category + Date + Clear — satu baris di semua ukuran */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mb-2 scrollbar-thin scrollbar-thumb-white/10">
             <select
               value={filter.category}
               onChange={(e) => setFilter({ ...filter, category: e.target.value })}

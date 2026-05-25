@@ -132,7 +132,7 @@ export default function EventModal({ isOpen, onClose, event, addEvent, updateEve
 
       {/* Dialog — centered, scrollable, di semua ukuran layar */}
       <div
-        className="relative w-full max-w-lg max-h-[88vh] overflow-y-auto glass rounded-[20px]"
+        className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto glass rounded-[20px]"
         style={{ animation: 'scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
       >
 
@@ -156,7 +156,7 @@ export default function EventModal({ isOpen, onClose, event, addEvent, updateEve
         </div>
 
         {/* ── Form ── */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
 
           {/* Error */}
           {error && (

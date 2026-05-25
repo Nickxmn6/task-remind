@@ -4,7 +4,7 @@ import WelcomeModal from './WelcomeModal'
 
 export default function MainLayout() {
   return (
-    <div className="min-h-screen flex relative">
+    <div className="min-h-[100dvh] flex relative">
       <WelcomeModal />
       {/* Ambient orbs */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
@@ -20,7 +20,7 @@ export default function MainLayout() {
         Mobile  → tidak digeser, cukup padding atas untuk top navbar
       */}
       <main
-        className="flex-1 relative pt-[5rem] pb-6 px-4 md:pt-6 md:px-6 md:ml-[17rem]"
+        className="flex-1 min-w-0 relative pt-[5rem] pb-6 px-4 md:pt-6 md:px-6 md:ml-[17rem]"
         style={{ zIndex: 1 }}
       >
         <div className="max-w-4xl mx-auto">

@@ -16,7 +16,7 @@ export default function CertificateModal({ isOpen, onClose, event }) {
 
       {/* Dialog */}
       <div
-        className="relative w-full max-w-2xl max-h-[88vh] flex flex-col glass rounded-[20px] overflow-hidden"
+        className="relative w-full max-w-2xl max-h-[90dvh] flex flex-col glass rounded-[20px] overflow-hidden"
         style={{ animation: 'scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
       >
         {/* Header */}
@@ -36,7 +36,7 @@ export default function CertificateModal({ isOpen, onClose, event }) {
         </div>
 
         {/* Body */}
-        <div className="p-6 flex-1 overflow-y-auto flex flex-col items-center justify-center bg-black/20">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto flex flex-col items-center justify-center bg-black/20">
           <img 
             src={event.certificate_url} 
             alt="Certificate" 

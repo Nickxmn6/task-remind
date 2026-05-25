@@ -168,7 +168,7 @@ export default function GlobalComms() {
   // Removed formatSeconds
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] max-w-4xl mx-auto relative z-10 animate-fadeIn">
+    <div className="flex flex-col h-[calc(100dvh-6rem)] max-w-4xl mx-auto relative z-10 animate-fadeIn">
       {toast && <ToastNotification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       
       {/* HEADER */}

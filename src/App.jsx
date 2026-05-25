@@ -1,14 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import AuthPage from './pages/AuthPage'
-import MainLayout from './components/MainLayout'
-import Dashboard from './pages/Dashboard'
-import Schedule from './pages/Schedule'
-import Drive from './pages/Drive'
-import RoleManager from './pages/RoleManager'
-import AdminPanel from './pages/AdminPanel'
-import GlobalComms from './pages/GlobalComms'
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
+
+const AuthPage = lazy(() => import('./pages/AuthPage'))
+const MainLayout = lazy(() => import('./components/MainLayout'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Schedule = lazy(() => import('./pages/Schedule'))
+const Drive = lazy(() => import('./pages/Drive'))
+const RoleManager = lazy(() => import('./pages/RoleManager'))
+const AdminPanel = lazy(() => import('./pages/AdminPanel'))
+const GlobalComms = lazy(() => import('./pages/GlobalComms'))
 
 // Premium splash screen
 function SplashScreen() {
@@ -63,29 +64,31 @@ function AppRoutes() {
   if (loading) return <SplashScreen />
   
   return (
-    <Routes>
-      <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
-      <Route path="/" element={
-        <PrivateRoute>
-          <MainLayout />
-        </PrivateRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="schedule" element={<Schedule />} />
-        <Route path="drive" element={<Drive />} />
-        <Route path="comms" element={<GlobalComms />} />
-        <Route path="roles" element={
-          <DevRoute>
-            <RoleManager />
-          </DevRoute>
-        } />
-        <Route path="admin" element={
-          <DevRoute>
-            <AdminPanel />
-          </DevRoute>
-        } />
-      </Route>
-    </Routes>
+    <Suspense fallback={<SplashScreen />}>
+      <Routes>
+        <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
+        <Route path="/" element={
+          <PrivateRoute>
+            <MainLayout />
+          </PrivateRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="schedule" element={<Schedule />} />
+          <Route path="drive" element={<Drive />} />
+          <Route path="comms" element={<GlobalComms />} />
+          <Route path="roles" element={
+            <DevRoute>
+              <RoleManager />
+            </DevRoute>
+          } />
+          <Route path="admin" element={
+            <DevRoute>
+              <AdminPanel />
+            </DevRoute>
+          } />
+        </Route>
+      </Routes>
+    </Suspense>
   )
 }
 

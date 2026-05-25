@@ -90,7 +90,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 relative overflow-hidden">
       {toast && (
         <ToastNotification
           message={toast.message}

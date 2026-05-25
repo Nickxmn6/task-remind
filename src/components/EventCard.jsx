@@ -98,9 +98,9 @@ export default function EventCard({ event, onEdit, onStatusUpdate, onViewCertifi
                   <span>{event.time}</span>
                 </div>
                 {event.location && (
-                  <div className="flex items-center gap-1.5 text-white/50 text-xs">
+                  <div className="flex items-center gap-1.5 text-white/50 text-xs min-w-0 w-full">
                     <MapPin size={12} className="flex-shrink-0" />
-                    <span className="truncate">{event.location}</span>
+                    <span className="truncate block">{event.location}</span>
                   </div>
                 )}
                 {event.reminder_enabled && (
