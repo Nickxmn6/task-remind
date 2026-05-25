@@ -239,13 +239,28 @@ export default function WebinarInfo() {
           <p className="text-white/50 text-sm mt-1">Pengumuman & informasi event terbaru</p>
         </div>
         <button 
-          onClick={() => {
-            window.OneSignalDeferred = window.OneSignalDeferred || [];
-            window.OneSignalDeferred.push(async function(OneSignal) {
-              if (OneSignal.Notifications) {
-                await OneSignal.Notifications.requestPermission();
-              }
-            });
+          onClick={async () => {
+             const perm = window.Notification?.permission;
+             if (perm === 'granted') {
+                 alert("Notifikasi sudah Aktif untuk perangkat ini! 🎉");
+                 return;
+             }
+             if (perm === 'denied') {
+                 alert("Anda pernah memblokir notifikasi! Buka Pengaturan Browser (ikon Gembok 🔒 di samping URL) -> ubah 'Notifikasi' menjadi 'Izinkan'.");
+                 return;
+             }
+             
+             // Sinkron: langsung minta izin bawaan browser agar tidak diblokir iOS
+             if (window.Notification) {
+                 const newPerm = await window.Notification.requestPermission();
+                 if (newPerm === 'granted') {
+                     alert("Sip! Notifikasi berhasil diaktifkan.");
+                 } else if (newPerm === 'denied') {
+                     alert("Anda baru saja menolak notifikasi. Anda bisa mengubahnya nanti dari pengaturan browser.");
+                 }
+             } else {
+                 alert("Browser/Perangkat Anda belum mendukung fitur notifikasi web.");
+             }
           }}
           className="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition-colors"
         >
