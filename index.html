@@ -18,8 +18,12 @@
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "ec0a9e13-23ca-49f3-b342-9788115d39e4",
+          notifyButton: {
+            enable: true, // Memunculkan tombol lonceng merah di pojok
+          }
         });
-        OneSignal.Slidedown.promptPush();
+        // Paksa memunculkan jendela notifikasi bawaan browser
+        await OneSignal.Notifications.requestPermission();
       });
     </script>
   </head>
