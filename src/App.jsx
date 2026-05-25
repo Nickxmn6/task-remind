@@ -39,7 +39,7 @@ function MaintenanceScreen() {
       {/* Ambient orbs */}
       <div className="orb orb-purple w-[500px] h-[500px] absolute -top-32 -left-32 opacity-40 pointer-events-none" />
       <div className="orb orb-blue w-[400px] h-[400px] absolute bottom-0 right-0 opacity-30 animate-float pointer-events-none" />
-      
+
       <div className="glass-card max-w-md w-full p-8 text-center animate-scale-in relative z-10">
         <div className="w-20 h-20 mx-auto rounded-lg bg-gradient-to-br from-zinc-500/20 to-zinc-600/20 border border-zinc-500/30 flex items-center justify-center mb-6 shadow-xl shadow-zinc-500/10">
           <Settings size={36} className="text-zinc-400 animate-[spin_4s_linear_infinite]" />
@@ -104,12 +104,12 @@ function AppRoutes() {
   }, [])
 
   if (loading || settingsLoading) return <SplashScreen />
-  
+
   const isAuthPage = window.location.pathname === '/auth'
   if (maintenance && profile?.role !== 'dev' && !isAuthPage) {
     return <MaintenanceScreen />
   }
-  
+
   return (
     <Suspense fallback={<SplashScreen />}>
       <Routes>

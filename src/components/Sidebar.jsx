@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext'
 import { Calendar, Home, LogOut, Settings, X, Menu, HardDrive, Shield, Megaphone, Terminal, Radio } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
-
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 function LiveClock() {
   const [time, setTime] = useState(new Date())
   useEffect(() => {
@@ -27,6 +28,24 @@ function LiveClock() {
 // Isi sidebar — digunakan di desktop sidebar & mobile drawer
 function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
   const initials = profile?.username?.[0]?.toUpperCase() ?? 'U'
+  const [hasNewWebinar, setHasNewWebinar] = useState(false)
+
+  useEffect(() => {
+    const q = query(collection(db, 'webinars'), orderBy('createdAt', 'desc'), limit(1))
+    const unsub = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const latestPost = snapshot.docs[0].data()
+        const latestTime = latestPost.createdAt?.toMillis?.() || Date.now()
+        const lastVisit = parseInt(localStorage.getItem('last_webinar_visit') || '0', 10)
+        
+        // If post is newer than last visit, and we are not currently on the page
+        if (latestTime > lastVisit && window.location.pathname !== '/webinar') {
+          setHasNewWebinar(true)
+        }
+      }
+    })
+    return () => unsub()
+  }, [])
 
   return (
     <div className="flex flex-col h-full relative overflow-hidden">
@@ -100,11 +119,20 @@ function SidebarInner({ profile, onNavClick, onOpenSettings, onSignOut }) {
         </NavLink>
         <NavLink
           to="/webinar"
-          onClick={onNavClick}
-          className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          onClick={() => {
+            if (onNavClick) onNavClick();
+            localStorage.setItem('last_webinar_visit', Date.now().toString());
+            setHasNewWebinar(false);
+          }}
+          className={({ isActive }) => `nav-link relative ${isActive ? 'active' : ''}`}
         >
           <Radio size={18} />
           <span className="text-sm font-medium">Webinar Info</span>
+          {hasNewWebinar && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center h-5 px-1.5 bg-pink-500 rounded text-[9px] font-bold text-white shadow-lg shadow-pink-500/20 animate-pulse">
+              NEW
+            </div>
+          )}
         </NavLink>
         {profile?.role === 'dev' && (
           <>

@@ -1,58 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
-    <!-- Viewport dengan safe-area support untuk notch / Dynamic Island -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#302b63" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>EventHub — Manage Your Events</title>
-    <meta name="description" content="Kelola event, jadwal, dan reminder kamu dengan tampilan premium liquid glass." />
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "ec0a9e13-23ca-49f3-b342-9788115d39e4",
-          notifyButton: {
-            enable: true, // Memunculkan tombol lonceng merah di pojok
-          }
-        });
-      });
-    </script>
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#121212" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Meta tags for social sharing -->
+    <meta property="og:title" content="EventHub" />
+    <meta property="og:description" content="Platform Manajemen Event & Komunitas" />
+    
     <title>EventHub</title>
-    <style>
-      /* Preloader CSS to prevent blank white screen on slow connections */
-      #initial-loader {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: #000000; display: flex; flex-direction: column;
-        justify-content: center; align-items: center; z-index: 9999;
-      }
-      .spinner {
-        width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
-        border-top-color: #fff; border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin { 100% { transform: rotate(360deg); } }
-      .loader-text { color: rgba(255,255,255,0.5); margin-top: 16px; font-family: monospace; font-size: 14px; }
-    </style>
   </head>
-  <body class="bg-[#0f0f11] text-white overflow-hidden selection:bg-white/20">
-    <div id="root">
-      <div id="initial-loader">
-        <div class="spinner"></div>
-        <div class="loader-text">INITIALIZING...</div>
-      </div>
-    </div>
+  <body class="bg-[#0f0f11] text-white overflow-y-auto overflow-x-hidden selection:bg-white/20">
+    <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, CheckCircle2, Trash2, Bell } from 'lucide-react'
+import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, CheckCircle2, Trash2 } from 'lucide-react'
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
@@ -189,46 +189,6 @@ export default function WebinarInfo() {
         createdAt: serverTimestamp()
       })
 
-      // Kirim Push Notification via OneSignal
-      try {
-        const messageBody = newPostContent.trim()
-        const shortMessage = messageBody.length > 50 ? messageBody.substring(0, 50) + '...' : messageBody
-        
-        const res = await fetch('/api/sendNotification', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            title: `Info Webinar: ${profile?.username || 'User'}`,
-            message: shortMessage,
-            url: window.location.origin + '/webinar'
-          })
-        })
-        const resText = await res.text();
-        let resData;
-        try {
-          resData = JSON.parse(resText);
-        } catch (e) {
-          console.error("Non-JSON response from server:", resText);
-          alert("Gagal memanggil API Notif (Server Error): " + res.status);
-          return;
-        }
-
-        if (!res.ok || !resData.success) {
-           alert("Gagal memanggil API Notif: " + JSON.stringify(resData));
-        } else if (resData.data?.errors) {
-           alert("Notif gagal disebar (Error dari OneSignal): " + JSON.stringify(resData.data.errors));
-        } else if (resData.data?.recipients === 0) {
-           alert("Postingan berhasil! Tapi Notif gagal disebar karena belum ada HP yang mengizinkan notifikasi.");
-        } else {
-           console.log("Notif berhasil dikirim ke " + resData.data?.recipients + " perangkat");
-        }
-      } catch (err) {
-        console.error('Failed to send OneSignal notification:', err)
-        alert("Terjadi kesalahan saat memanggil server notifikasi: " + err.message)
-      }
-
       setNewPostContent('')
     } catch (error) {
       console.error("Error adding post: ", error)
@@ -245,36 +205,6 @@ export default function WebinarInfo() {
           <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Webinar Info</h1>
           <p className="text-white/50 text-sm mt-1">Pengumuman & informasi event terbaru</p>
         </div>
-        <button 
-          onClick={async () => {
-             const perm = window.Notification?.permission;
-             if (perm === 'granted') {
-                 alert("Notifikasi sudah Aktif untuk perangkat ini! 🎉");
-                 return;
-             }
-             if (perm === 'denied') {
-                 alert("Anda pernah memblokir notifikasi! Buka Pengaturan Browser (ikon Gembok 🔒 di samping URL) -> ubah 'Notifikasi' menjadi 'Izinkan'.");
-                 return;
-             }
-             
-             // Sinkron: langsung minta izin bawaan browser agar tidak diblokir iOS
-             if (window.Notification) {
-                 const newPerm = await window.Notification.requestPermission();
-                 if (newPerm === 'granted') {
-                     alert("Sip! Notifikasi berhasil diaktifkan.");
-                 } else if (newPerm === 'denied') {
-                     alert("Anda baru saja menolak notifikasi. Anda bisa mengubahnya nanti dari pengaturan browser.");
-                 }
-             } else {
-                 alert("Browser/Perangkat Anda belum mendukung fitur notifikasi web.");
-             }
-          }}
-          className="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition-colors"
-        >
-          <Bell size={16} />
-          <span className="hidden md:inline">Nyalakan Notifikasi</span>
-          <span className="md:hidden">Notif</span>
-        </button>
       </div>
 
       {/* Main Feed Container */}

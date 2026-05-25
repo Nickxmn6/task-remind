@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -8,107 +8,23 @@ import { Send, Image as ImageIcon, Paperclip, X, File, Loader, Terminal, Trash2 
 import ToastNotification from '../components/ToastNotification';
 import { useToast } from '../hooks/useToast';
 
-const formatTime = (time) => {
-  if (!time) return '';
-  const d = time.toDate ? time.toDate() : new Date(time);
-  return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-};
-
-const ChatMessage = React.memo(function ChatMessage({ msg, profile, handleDeleteMessage, setViewingImage, handleDownload }) {
-  const isMe = msg.userId === profile?.id;
-  const isDev = msg.role === 'dev';
-
-  return (
-    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group`}>
-      <div className="flex items-end gap-2 max-w-[85%] md:max-w-[70%]">
-        {/* Delete button (Dev only) */}
-        {profile?.role === 'dev' && isMe && (
-          <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
-            <Trash2 size={14} />
-          </button>
-        )}
-
-        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-          {/* Sender Info */}
-          {!isMe && (
-            <div className="flex items-center gap-2 mb-1 px-1">
-              <span className={`text-xs font-bold ${isDev ? 'text-zinc-400' : 'text-green-400'}`}>
-                {msg.username}
-              </span>
-            </div>
-          )}
-
-          {/* Bubble */}
-          <div className={`relative p-3 rounded-lg shadow-xl border ${
-            isMe 
-              ? 'bg-green-500/10 border-green-500/20 rounded-br-sm' 
-              : 'bg-white/5 border-white/10 rounded-bl-sm'
-          }`}>
-            {/* TEXT */}
-            {msg.type === 'text' && (
-              <p className="text-white/90 text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-            )}
-            
-            {/* IMAGE */}
-            {msg.type === 'image' && (
-              <div className="space-y-2">
-                <img 
-                  src={msg.content} 
-                  alt="Upload" 
-                  className="rounded-xl max-h-64 object-cover cursor-pointer hover:opacity-90 transition shadow-sm" 
-                  onClick={() => setViewingImage(msg.content)}
-                />
-                {msg.caption && <p className="text-white/90 text-sm whitespace-pre-wrap">{msg.caption}</p>}
-              </div>
-            )}
-            
-            {/* FILE */}
-            {msg.type === 'file' && (
-              <div className="flex items-center gap-3 bg-black/30 p-3 rounded-xl hover:bg-black/40 transition cursor-pointer" onClick={() => handleDownload(msg.fileId, msg.fileName)}>
-                <div className="w-10 h-10 bg-zinc-500/20 rounded-lg flex items-center justify-center text-zinc-400">
-                  <File size={20} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white/90 truncate max-w-[150px] md:max-w-[200px]">{msg.fileName}</p>
-                  <p className="text-xs text-white/40">{(msg.fileSize / 1024).toFixed(1)} KB • Klik untuk unduh</p>
-                </div>
-              </div>
-            )}
-
-            <span className="text-[10px] text-white/30 font-mono mt-1.5 block text-right">
-              {formatTime(msg.timestamp)}
-            </span>
-          </div>
-        </div>
-
-        {/* Delete button (Dev only - left side for others' messages) */}
-        {profile?.role === 'dev' && !isMe && (
-          <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
-            <Trash2 size={14} />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-});
-
 export default function GlobalComms() {
   const { profile } = useAuth();
   const { toast, showToast, setToast } = useToast();
   const { startUpload, downloadFile, activeUploads } = useDrive();
-  
+
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
-  
+
   // Image Preview State
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageCaption, setImageCaption] = useState('');
   const [viewingImage, setViewingImage] = useState(null);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
-  
+
   // Removed Audio State
-  
+
   const messagesEndRef = useRef(null);
 
   // Auto Scroll
@@ -210,7 +126,7 @@ export default function GlobalComms() {
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     // Simulate finding active upload to show progress in UI if needed, but startUpload runs async
     const res = await startUpload(file);
     if (res && res.success) {
@@ -231,24 +147,32 @@ export default function GlobalComms() {
       showToast('Gagal upload dokumen.', 'error');
     }
   };
-  
-  const handleDownload = useCallback(async (fileId, fileName) => {
-     showToast('Mendownload file...', 'success');
-     await downloadFile({ id: fileId, name: fileName });
-  }, [downloadFile, showToast]);
 
-  const handleDeleteMessage = useCallback(async (id) => {
+  const handleDownload = async (fileId, fileName) => {
+    showToast('Mendownload file...', 'success');
+    await downloadFile({ id: fileId, name: fileName });
+  };
+
+  const handleDeleteMessage = async (id) => {
     if (profile?.role !== 'dev') return;
     if (window.confirm('Hapus pesan ini secara permanen?')) {
       await deleteDoc(doc(db, 'global_chats', id));
       showToast('Pesan dihapus.', 'success');
     }
-  }, [profile?.role, showToast]);
+  };
+
+  const formatTime = (time) => {
+    if (!time) return '';
+    const d = time.toDate ? time.toDate() : new Date(time);
+    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Removed formatSeconds
 
   return (
     <div className="flex flex-col h-[calc(100dvh-6rem)] max-w-4xl mx-auto relative z-10 animate-fadeIn">
       {toast && <ToastNotification message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      
+
       {/* HEADER */}
       <header className="glass rounded-t-2xl p-4 flex items-center justify-between border-b border-white/5 shadow-md z-20">
         <div className="flex items-center gap-3">
@@ -273,37 +197,106 @@ export default function GlobalComms() {
             <p className="font-mono text-sm">INITIALIZING SECURE CHANNEL...</p>
           </div>
         )}
-        
-        {messages.map((msg) => (
-          <ChatMessage 
-            key={msg.id} 
-            msg={msg} 
-            profile={profile} 
-            handleDeleteMessage={handleDeleteMessage} 
-            setViewingImage={setViewingImage} 
-            handleDownload={handleDownload} 
-          />
-        ))}
+
+        {messages.map((msg) => {
+          const isMe = msg.userId === profile?.id;
+          const isDev = msg.role === 'dev';
+
+          return (
+            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group`}>
+              <div className="flex items-end gap-2 max-w-[85%] md:max-w-[70%]">
+
+                {/* Delete button (Dev only) */}
+                {profile?.role === 'dev' && isMe && (
+                  <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
+                    <Trash2 size={14} />
+                  </button>
+                )}
+
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  {/* Sender Info */}
+                  {!isMe && (
+                    <div className="flex items-center gap-2 mb-1 px-1">
+                      <span className={`text-xs font-bold ${isDev ? 'text-zinc-400' : 'text-green-400'}`}>
+                        {msg.username}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Bubble */}
+                  <div className={`relative p-3 rounded-lg shadow-xl border ${isMe
+                      ? 'bg-green-500/10 border-green-500/20 rounded-br-sm'
+                      : 'bg-white/5 border-white/10 rounded-bl-sm'
+                    }`}>
+                    {/* TEXT */}
+                    {msg.type === 'text' && (
+                      <p className="text-white/90 text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    )}
+
+                    {/* IMAGE */}
+                    {msg.type === 'image' && (
+                      <div className="space-y-2">
+                        <img
+                          src={msg.content}
+                          alt="Upload"
+                          className="rounded-xl max-h-64 object-cover cursor-pointer hover:opacity-90 transition shadow-sm"
+                          onClick={() => setViewingImage(msg.content)}
+                        />
+                        {msg.caption && <p className="text-white/90 text-sm whitespace-pre-wrap">{msg.caption}</p>}
+                      </div>
+                    )}
+
+                    {/* Removed AUDIO */}
+
+                    {/* FILE */}
+                    {msg.type === 'file' && (
+                      <div className="flex items-center gap-3 bg-black/30 p-3 rounded-xl hover:bg-black/40 transition cursor-pointer" onClick={() => handleDownload(msg.fileId, msg.fileName)}>
+                        <div className="w-10 h-10 bg-zinc-500/20 rounded-lg flex items-center justify-center text-zinc-400">
+                          <File size={20} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white/90 truncate max-w-[150px] md:max-w-[200px]">{msg.fileName}</p>
+                          <p className="text-xs text-white/40">{(msg.fileSize / 1024).toFixed(1)} KB • Klik untuk unduh</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <span className="text-[10px] text-white/30 font-mono mt-1.5 block text-right">
+                      {formatTime(msg.timestamp)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Delete button (Dev only - left side for others' messages) */}
+                {profile?.role === 'dev' && !isMe && (
+                  <button onClick={() => handleDeleteMessage(msg.id)} className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition mb-2">
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
       {/* INPUT AREA */}
       <div className="glass rounded-b-2xl p-4 border-t border-white/5 z-20">
         <form onSubmit={sendTextMessage} className="flex items-end gap-2">
-          
+
           {/* Attachments */}
           <div className="flex gap-1 mb-1">
             <button type="button" onClick={() => imageInputRef.current?.click()} className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition">
               <ImageIcon size={18} />
             </button>
             <input type="file" accept="image/*" className="hidden" ref={imageInputRef} onChange={handleImageSelect} />
-            
+
             <button type="button" onClick={() => fileInputRef.current?.click()} className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition">
               <Paperclip size={18} />
             </button>
             <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />
           </div>
-          
+
           {/* Text Input */}
           <div className="flex-1 bg-black/20 border border-white/10 rounded-lg flex items-center px-4 overflow-hidden relative">
             <input
@@ -314,7 +307,7 @@ export default function GlobalComms() {
               className="w-full py-3 bg-transparent border-none focus:outline-none text-white text-sm font-mono placeholder:text-white/20"
             />
           </div>
-          
+
           {/* Send Button */}
           <div className="mb-0.5">
             <button type="submit" className={`w-11 h-11 rounded-xl flex items-center justify-center transition shadow-lg ${text.trim() ? 'bg-green-500 hover:bg-green-400 text-black shadow-green-500/20' : 'bg-white/10 text-white/30'}`}>
@@ -347,11 +340,11 @@ export default function GlobalComms() {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className="glass p-2 rounded-lg shadow-2xl mb-6 max-h-[60vh] overflow-hidden">
               <img src={selectedImage} alt="Preview" className="w-full h-full object-contain rounded-xl max-h-[58vh]" />
             </div>
-            
+
             <div className="w-full flex gap-3">
               <input
                 type="text"
@@ -360,7 +353,7 @@ export default function GlobalComms() {
                 placeholder="Tambahkan keterangan (opsional)..."
                 className="flex-1 glass-input rounded-lg py-4 px-6 text-white"
                 autoFocus
-                onKeyDown={(e) => { if(e.key === 'Enter') sendImageMessage() }}
+                onKeyDown={(e) => { if (e.key === 'Enter') sendImageMessage() }}
               />
               <button onClick={sendImageMessage} className="w-14 h-14 bg-green-500 hover:bg-green-400 text-black rounded-lg flex items-center justify-center transition shadow-xl shadow-green-500/20">
                 <Send size={20} className="ml-1" />
@@ -372,27 +365,27 @@ export default function GlobalComms() {
 
       {/* FULL SCREEN IMAGE VIEW MODAL */}
       {viewingImage && createPortal(
-        <div 
+        <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-2 md:p-8 animate-fadeIn cursor-pointer"
           onClick={() => setViewingImage(null)}
         >
           <div className="absolute top-0 left-0 w-full p-4 flex justify-end bg-gradient-to-b from-black/50 to-transparent z-50">
-            <button 
-              onClick={() => setViewingImage(null)} 
+            <button
+              onClick={() => setViewingImage(null)}
               className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition shadow-xl backdrop-blur-sm"
             >
               <X size={24} />
             </button>
           </div>
-          <img 
-            src={viewingImage} 
-            alt="Full screen preview" 
+          <img
+            src={viewingImage}
+            alt="Full screen preview"
             className="max-w-full max-h-[100dvh] md:max-h-full object-contain shadow-2xl animate-scale-in relative z-40"
           />
         </div>,
         document.body
       )}
-      
+
       {/* Removed Audio Styles */}
     </div>
   );
