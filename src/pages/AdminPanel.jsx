@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, orderBy, limit, onSnapshot, getDocs, where, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Megaphone, Save, Loader, Activity, ShieldAlert, CheckCircle, XCircle, Settings, Power } from 'lucide-react';
+import { Megaphone, Save, Loader, Activity, ShieldAlert, CheckCircle, XCircle, Settings, Power, Trash2 } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 import ToastNotification from '../components/ToastNotification';
 
@@ -16,6 +16,7 @@ export default function AdminPanel() {
   const [savingMaintenance, setSavingMaintenance] = useState(false);
   const [swipeValue, setSwipeValue] = useState(0);
   const { toast, showToast, setToast } = useToast();
+  const [deletingChats, setDeletingChats] = useState(false);
 
   const [logs, setLogs] = useState([]);
 
@@ -103,6 +104,31 @@ export default function AdminPanel() {
       await toggleMaintenance();
     } else {
       setSwipeValue(maintenanceMode ? 100 : 0);
+    }
+  };
+
+  const handleDeleteTargetChats = async () => {
+    if (!window.confirm('Yakin ingin menghapus semua chat dari nickxmn6@gmail.com? Tindakan ini tidak dapat dibatalkan.')) return;
+    
+    setDeletingChats(true);
+    try {
+      const q = query(collection(db, 'global_chats'), where('email', '==', 'nickxmn6@gmail.com'));
+      const snapshot = await getDocs(q);
+      
+      let count = 0;
+      const deletePromises = [];
+      snapshot.forEach((docSnap) => {
+        deletePromises.push(deleteDoc(docSnap.ref));
+        count++;
+      });
+      
+      await Promise.all(deletePromises);
+      showToast(`Berhasil menghapus ${count} pesan dari nickxmn6@gmail.com`, 'success');
+    } catch (error) {
+      console.error('Error deleting chats:', error);
+      showToast('Gagal menghapus pesan.', 'error');
+    } finally {
+      setDeletingChats(false);
     }
   };
 
@@ -269,6 +295,28 @@ export default function AdminPanel() {
               </div>
             </div>
           )}
+
+          <div className="pt-6 border-t border-white/5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Trash2 size={18} className="text-red-400" />
+                  Hapus Chat User
+                </h2>
+                <p className="text-white/50 text-sm mt-1">
+                  Hapus semua chat secara permanen dari user <strong>nickxmn6@gmail.com</strong>.
+                </p>
+              </div>
+              <button
+                onClick={handleDeleteTargetChats}
+                disabled={deletingChats}
+                className="px-4 py-2 bg-red-500/20 text-red-200 border border-red-500/50 hover:bg-red-500/30 rounded-lg transition flex items-center gap-2 flex-shrink-0"
+              >
+                {deletingChats ? <Loader className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                {deletingChats ? 'Menghapus...' : 'Hapus Semua'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
