@@ -60,7 +60,7 @@ export default function RoleManager() {
     setSaving(userId);
     let newStatus = 'active';
     if (isChecked) newStatus = type;
-    
+
     try {
       await updateDoc(doc(db, 'profiles', userId), {
         status: newStatus
@@ -102,14 +102,13 @@ export default function RoleManager() {
           const isMe = u.id === profile?.id;
           const isBanned = u.status === 'banned';
           const isTimeout = u.status === 'timeout';
-          
+
           return (
             <div key={u.id} className={`glass-card p-4 rounded-lg border border-white/5 ${isBanned ? 'opacity-60' : ''}`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${
-                    isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-zinc-600'
-                  }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-zinc-600'
+                    }`}>
                     {u.username?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div>
@@ -117,15 +116,14 @@ export default function RoleManager() {
                     <span className="text-white/40 text-xs block mt-0.5 max-w-[150px] truncate">{u.email || '-'}</span>
                   </div>
                 </div>
-                <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                  u.role === 'dev' 
-                    ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30' 
+                <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${u.role === 'dev'
+                    ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30'
                     : 'bg-white/10 text-white/70 border border-white/10'
-                }`}>
+                  }`}>
                   {u.role === 'dev' ? 'DEV' : 'USER'}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-black/20 rounded-xl p-3 flex flex-col items-center justify-center">
                   <span className="text-white/40 text-[10px] uppercase font-bold tracking-wider mb-2">Ban</span>
@@ -177,14 +175,13 @@ export default function RoleManager() {
                 const isMe = u.id === profile?.id;
                 const isBanned = u.status === 'banned';
                 const isTimeout = u.status === 'timeout';
-                
+
                 return (
                   <tr key={u.id} className={`border-b border-white/5 hover:bg-white/[0.02] transition ${isBanned ? 'opacity-60' : ''}`}>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg ${
-                          isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-zinc-600'
-                        }`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg ${isBanned ? 'bg-red-500/50' : 'bg-gradient-to-br from-violet-500 to-zinc-600'
+                          }`}>
                           {u.username?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div>
@@ -194,32 +191,31 @@ export default function RoleManager() {
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                        u.role === 'dev' 
-                          ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30' 
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${u.role === 'dev'
+                          ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30'
                           : 'bg-white/10 text-white/70 border border-white/10'
-                      }`}>
+                        }`}>
                         {u.role === 'dev' ? <Shield size={12} className="mr-1.5" /> : <User size={12} className="mr-1.5" />}
                         {u.role === 'dev' ? 'Dev' : 'User'}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <Toggle 
-                          checked={isBanned} 
-                          onChange={(e) => handleStatusChange(u.id, 'banned', e.target.checked)} 
-                          disabled={saving === u.id || isMe} 
-                          colorClass="peer-checked:bg-red-500" 
+                        <Toggle
+                          checked={isBanned}
+                          onChange={(e) => handleStatusChange(u.id, 'banned', e.target.checked)}
+                          disabled={saving === u.id || isMe}
+                          colorClass="peer-checked:bg-red-500"
                         />
                       </div>
                     </td>
                     <td className="py-4 px-6 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <Toggle 
-                          checked={isTimeout} 
-                          onChange={(e) => handleStatusChange(u.id, 'timeout', e.target.checked)} 
-                          disabled={saving === u.id || isMe || isBanned} 
-                          colorClass="peer-checked:bg-orange-500" 
+                        <Toggle
+                          checked={isTimeout}
+                          onChange={(e) => handleStatusChange(u.id, 'timeout', e.target.checked)}
+                          disabled={saving === u.id || isMe || isBanned}
+                          colorClass="peer-checked:bg-orange-500"
                         />
                       </div>
                     </td>

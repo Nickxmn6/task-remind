@@ -94,12 +94,19 @@ function AppRoutes() {
   const [settingsLoading, setSettingsLoading] = useState(true)
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'settings', 'app'), (docSnap) => {
-      if (docSnap.exists()) {
-        setMaintenance(docSnap.data().maintenanceMode || false)
+    const unsub = onSnapshot(
+      doc(db, 'settings', 'app'), 
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setMaintenance(docSnap.data().maintenanceMode || false)
+        }
+        setSettingsLoading(false)
+      },
+      (error) => {
+        console.error('Error fetching settings:', error)
+        setSettingsLoading(false)
       }
-      setSettingsLoading(false)
-    })
+    )
     return () => unsub()
   }, [])
 

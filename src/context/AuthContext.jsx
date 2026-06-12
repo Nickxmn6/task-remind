@@ -1,10 +1,10 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { auth, db } from '../lib/firebase';
-import { 
-  onAuthStateChanged, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut as firebaseSignOut 
+import {
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { logSecurityEvent } from '../lib/securityLogger';
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     // CEK CACHE DULU - langsung tampilkan dari localStorage
     const cachedUser = localStorage.getItem('fb-user');
     if (cachedUser) {
@@ -31,12 +31,12 @@ export function AuthProvider({ children }) {
           if (cached.profile) setProfile(cached.profile);
           setLoading(false);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!isMounted) return;
-      
+
       if (firebaseUser) {
         // Map to simpler user object format if needed, or just use firebaseUser
         const userData = {
@@ -70,16 +70,16 @@ export function AuthProvider({ children }) {
       if (cachedProfile) {
         setProfile(JSON.parse(cachedProfile));
       }
-      
+
       // Fetch fresh data di background
       const docRef = doc(db, 'profiles', userId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         // Add ID to profile data to match Supabase response behavior
         let profileData = { id: userId, ...data };
-        
+
         if (email === 'nickxmn6@gmail.com') {
           profileData.role = 'dev';
           if (data.role !== 'dev') updateDoc(docRef, { role: 'dev' });
@@ -89,14 +89,14 @@ export function AuthProvider({ children }) {
         localStorage.setItem(`profile-${userId}`, JSON.stringify(profileData));
       } else {
         // Create new profile if it doesn't exist
-        const newProfile = { 
+        const newProfile = {
           username: email?.split('@')[0] || 'User',
           email: email || null,
           role: email === 'nickxmn6@gmail.com' ? 'dev' : 'user',
           status: 'active'
         };
         await setDoc(docRef, newProfile);
-        
+
         const profileData = { id: userId, ...newProfile };
         setProfile(profileData);
         localStorage.setItem(`profile-${userId}`, JSON.stringify(profileData));
@@ -110,7 +110,7 @@ export function AuthProvider({ children }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
+
       // Create profile in Firestore
       await setDoc(doc(db, 'profiles', user.uid), {
         username: username || email.split('@')[0],
@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
         role: email === 'nickxmn6@gmail.com' ? 'dev' : 'user',
         status: 'active'
       });
-      
+
       logSecurityEvent('SIGN_UP', user.uid, email, { username });
       return { data: { user }, error: null };
     } catch (error) {
@@ -132,18 +132,18 @@ export function AuthProvider({ children }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
+
       const userData = {
         id: user.uid,
         email: user.email,
       };
-      
+
       localStorage.setItem('fb-user', JSON.stringify({
         user: userData,
         expires: Date.now() + 3600000
       }));
       await fetchProfile(user.uid, user.email);
-      
+
       logSecurityEvent('SIGN_IN', user.uid, user.email);
       return { data: { user: userData }, error: null };
     } catch (error) {
@@ -175,11 +175,11 @@ export function AuthProvider({ children }) {
     try {
       const docRef = doc(db, 'profiles', user.id);
       await updateDoc(docRef, updates);
-      
+
       const updatedProfile = { ...profile, ...updates };
       setProfile(updatedProfile);
       localStorage.setItem(`profile-${user.id}`, JSON.stringify(updatedProfile));
-      
+
       return { data: updatedProfile, error: null };
     } catch (error) {
       console.error('Error updating profile:', error);

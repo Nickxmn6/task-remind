@@ -29,7 +29,7 @@ service cloud.firestore {
 
     // 2. SETTINGS COLLECTION
     match /settings/{docId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isDev();
     }
 
