@@ -108,11 +108,11 @@ export default function AdminPanel() {
   };
 
   const handleDeleteTargetChats = async () => {
-    if (!window.confirm('Yakin ingin menghapus semua chat dari nickxmn6@gmail.com? Tindakan ini tidak dapat dibatalkan.')) return;
+    if (!window.confirm('Yakin ingin mengosongkan seluruh Global Chat? Tindakan ini akan menghapus chat dari semua pengguna dan tidak dapat dibatalkan.')) return;
     
     setDeletingChats(true);
     try {
-      const q = query(collection(db, 'global_chats'), where('email', '==', 'nickxmn6@gmail.com'));
+      const q = query(collection(db, 'global_chats'));
       const snapshot = await getDocs(q);
       
       let count = 0;
@@ -123,7 +123,7 @@ export default function AdminPanel() {
       });
       
       await Promise.all(deletePromises);
-      showToast(`Berhasil menghapus ${count} pesan dari nickxmn6@gmail.com`, 'success');
+      showToast(`Berhasil menghapus seluruh ${count} pesan di Global Chat`, 'success');
     } catch (error) {
       console.error('Error deleting chats:', error);
       showToast('Gagal menghapus pesan.', 'error');
@@ -301,10 +301,10 @@ export default function AdminPanel() {
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Trash2 size={18} className="text-red-400" />
-                  Hapus Chat User
+                  Kosongkan Global Chat
                 </h2>
                 <p className="text-white/50 text-sm mt-1">
-                  Hapus semua chat secara permanen dari user <strong>nickxmn6@gmail.com</strong>.
+                  Hapus <strong>semua</strong> chat dari semua pengguna secara permanen.
                 </p>
               </div>
               <button
